@@ -17,8 +17,13 @@ public class CatalogServiceImpl implements CatalogService {
     private DataSource dataSource;
 
     @Override
-    public Node add(Map<String, String> params) {
-        return null;
+    public boolean add(Map<String, String> params) {
+        Node node = new Node();
+        node.setParentId(Integer.valueOf(params.get("parentId")));
+        node.setName(params.get("name"));
+        
+
+        return true;
     }
 
     @Override

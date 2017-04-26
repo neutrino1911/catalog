@@ -25,6 +25,7 @@ public class MainRest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @PUT @Path(value = "/add")
+    @Consumes("application/x-www-form-urlencoded")
     public Response add(MultivaluedMap<String, String> formParams) {
         Map<String, String> params = new HashMap<>(formParams.size());
         for (String key : formParams.keySet()) {

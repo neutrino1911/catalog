@@ -9,7 +9,7 @@ public class Node {
     private long parentId;
     private String name;
     private Map<String, String> data;
-    private Set<Node> children;
+    //private Set<Node> children;
 
     public long getId() {
         return id;
@@ -43,11 +43,11 @@ public class Node {
         this.data = data;
     }
 
-    public Set<Node> getChildren() {
+    /*public Set<Node> getChildren() {
         return children;
     }
 
     public void setChildren(Set<Node> children) {
         this.children = children;
-    }
+    }*/
 }

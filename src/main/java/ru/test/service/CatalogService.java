@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface CatalogService {
 
-    Node add (Map<String, String> params);
+    boolean add (Map<String, String> params);
     Node get(long id);
     List<Node> getTree(long parentId);
     boolean remove(long id);
