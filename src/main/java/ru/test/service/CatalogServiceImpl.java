@@ -42,7 +42,7 @@ public class CatalogServiceImpl implements CatalogService {
                 dataStatement.executeUpdate();
             }
             connection.commit();
-        } catch (NullPointerException | SQLException e) {
+        } catch (SQLException e) {
             return false;
         }
         return true;
@@ -147,7 +147,10 @@ public class CatalogServiceImpl implements CatalogService {
                     fieldUpdateStatement.setString(1, field.getName());
                     fieldUpdateStatement.setString(2, field.getValue());
                     fieldUpdateStatement.setLong(3, field.getId());
-                    fieldUpdateStatement.executeUpdate();
+                    int code = fieldUpdateStatement.executeUpdate();
+                    if (code == 0) {
+                        return false;
+                    }
                 } else {
                     fieldInsertStatement.setLong(1, node.getId());
                     fieldInsertStatement.setString(2, field.getName());
@@ -156,7 +159,7 @@ public class CatalogServiceImpl implements CatalogService {
                 }
             }
             connection.commit();
-        } catch (NullPointerException | SQLException e) {
+        } catch (SQLException e) {
             return false;
         }
         return true;
@@ -170,6 +173,7 @@ public class CatalogServiceImpl implements CatalogService {
         node.setParentId(Long.valueOf(params.get("parentId")));
         node.setName(params.get("name"));
         List<Field> list = new ArrayList<>(params.size());
+        node.setFields(list);
         for (String key : params.keySet()) {
             if (key.matches("f\\d+")) {
                 String value = params.get(key.replace('f', 'v'));
@@ -186,7 +190,6 @@ public class CatalogServiceImpl implements CatalogService {
                 }
             }
         }
-        node.setFields(list);
         return node;
     }
 
