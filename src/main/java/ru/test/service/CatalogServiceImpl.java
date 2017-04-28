@@ -118,17 +118,13 @@ public class CatalogServiceImpl implements CatalogService {
         } else {
             query = "DELETE FROM `node` WHERE `id` = ?";
         }
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            if (id > 0) {
-                statement.setLong(1, id);
-            }
-            int code = statement.executeUpdate();
-            return code != 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return removeById(query, id);
+    }
+
+    @Override
+    public boolean removeField(long id) {
+        String query = "DELETE FROM `field` WHERE `id` = ?";
+        return removeById(query, id);
     }
 
     @Override
@@ -192,5 +188,19 @@ public class CatalogServiceImpl implements CatalogService {
         }
         node.setFields(list);
         return node;
+    }
+
+    private boolean removeById(String query, long id) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            if (id > 0) {
+                statement.setLong(1, id);
+            }
+            int code = statement.executeUpdate();
+            return code != 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

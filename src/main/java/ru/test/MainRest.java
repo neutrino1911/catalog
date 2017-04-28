@@ -25,28 +25,6 @@ public class MainRest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @PUT @Path(value = "/add")
-    @Consumes("application/x-www-form-urlencoded")
-    public Response add(MultivaluedMap<String, String> formParams) {
-        Map<String, String> params = new HashMap<>(formParams.size());
-        for (String key : formParams.keySet()) {
-            params.put(escapeHtml4(key), escapeHtml4(formParams.getFirst(key)));
-        }
-        boolean result = catalogService.add(params);
-        return getSuccess(result);
-    }
-
-    @PUT @Path(value = "/update")
-    @Consumes("application/x-www-form-urlencoded")
-    public Response update(MultivaluedMap<String, String> formParams) {
-        Map<String, String> params = new HashMap<>(formParams.size());
-        for (String key : formParams.keySet()) {
-            params.put(escapeHtml4(key), escapeHtml4(formParams.getFirst(key)));
-        }
-        boolean result = catalogService.update(params);
-        return getSuccess(result);
-    }
-
     @GET @Path(value = "/get/{id : \\d+}")
     public Response get(@PathParam("id") long id) {
         if (id < 0) {
@@ -71,12 +49,61 @@ public class MainRest {
         return getSuccess(list);
     }
 
+    @PUT @Path(value = "/add/{parentId : \\d+}")
+    @Consumes("application/x-www-form-urlencoded")
+    public Response add(
+            @PathParam("parentId") long parentId,
+            MultivaluedMap<String, String> formParams) {
+        Map<String, String> params = new HashMap<>(formParams.size());
+        params.put("parentId", String.valueOf(parentId));
+        for (String key : formParams.keySet()) {
+            params.put(escapeHtml4(key), escapeHtml4(formParams.getFirst(key)));
+        }
+        boolean status = catalogService.add(params);
+        if (status) {
+            return getSuccess(status);
+        } else {
+            return getError(500);
+        }
+    }
+
+    @PUT @Path(value = "/update/{id : \\d+}")
+    @Consumes("application/x-www-form-urlencoded")
+    public Response update(
+            @PathParam("id") long id,
+            MultivaluedMap<String, String> formParams) {
+        Map<String, String> params = new HashMap<>(formParams.size());
+        params.put("id", String.valueOf(id));
+        for (String key : formParams.keySet()) {
+            params.put(escapeHtml4(key), escapeHtml4(formParams.getFirst(key)));
+        }
+        boolean status = catalogService.update(params);
+        if (status) {
+            return getSuccess(status);
+        } else {
+            return getError(500);
+        }
+    }
+
     @DELETE @Path(value = "/remove/{id : \\d+}")
     public Response removeItem(@PathParam("id") long id) {
         if (id < 0) {
             return getError(400);
         }
         boolean status = catalogService.remove(id);
+        if (status) {
+            return getSuccess(status);
+        } else {
+            return getError(404);
+        }
+    }
+
+    @DELETE @Path(value = "/removefield/{id : \\d+}")
+    public Response removeField(@PathParam("id") long id) {
+        if (id < 0) {
+            return getError(400);
+        }
+        boolean status = catalogService.removeField(id);
         if (status) {
             return getSuccess(status);
         } else {
