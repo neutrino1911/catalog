@@ -11,4 +11,5 @@ public interface CatalogService {
     Node get(long id);
     List<Node> getTree(long parentId);
     boolean remove(long id);
+    boolean update(Map<String, String> params);
 }

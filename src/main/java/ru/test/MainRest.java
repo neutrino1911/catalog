@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
+
 @Path("/")
 @Produces("application/json; charset=UTF-8")
 public class MainRest {
@@ -28,9 +30,20 @@ public class MainRest {
     public Response add(MultivaluedMap<String, String> formParams) {
         Map<String, String> params = new HashMap<>(formParams.size());
         for (String key : formParams.keySet()) {
-            params.put(key, formParams.getFirst(key));
+            params.put(escapeHtml4(key), escapeHtml4(formParams.getFirst(key)));
         }
         boolean result = catalogService.add(params);
+        return getSuccess(result);
+    }
+
+    @PUT @Path(value = "/update")
+    @Consumes("application/x-www-form-urlencoded")
+    public Response update(MultivaluedMap<String, String> formParams) {
+        Map<String, String> params = new HashMap<>(formParams.size());
+        for (String key : formParams.keySet()) {
+            params.put(escapeHtml4(key), escapeHtml4(formParams.getFirst(key)));
+        }
+        boolean result = catalogService.update(params);
         return getSuccess(result);
     }
 

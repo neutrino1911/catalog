@@ -7,6 +7,20 @@ public class Field {
     private String name;
     private String value;
 
+    public Field() {}
+
+    public Field(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
+
+    public Field(long id, long nodeId, String name, String value) {
+        this.id = id;
+        this.nodeId = nodeId;
+        this.name = name;
+        this.value = value;
+    }
+
     public long getId() {
         return id;
     }

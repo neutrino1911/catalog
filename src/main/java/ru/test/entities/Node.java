@@ -1,14 +1,19 @@
 package ru.test.entities;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 public class Node {
 
     private long id;
     private long parentId;
     private String name;
-    private Map<String, String> data;
+    private List<Field> fields;
+
+    public Node() {}
+
+    public Node(long id) {
+        this.id = id;
+    }
 
     public long getId() {
         return id;
@@ -34,11 +39,11 @@ public class Node {
         this.name = name;
     }
 
-    public Map<String, String> getData() {
-        return data;
+    public List<Field> getFields() {
+        return fields;
     }
 
-    public void setData(Map<String, String> data) {
-        this.data = data;
+    public void setFields(List<Field> fields) {
+        this.fields = fields;
     }
 }
