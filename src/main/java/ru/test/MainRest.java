@@ -2,13 +2,12 @@ package ru.test;
 
 import javax.ejb.EJB;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ru.test.entities.Node;
 import ru.test.service.CatalogService;
 
 import java.util.HashMap;
@@ -31,7 +30,20 @@ public class MainRest {
         for (String key : formParams.keySet()) {
             params.put(key, formParams.getFirst(key));
         }
-        return getSuccess(params);
+        boolean result = catalogService.add(params);
+        return getSuccess(result);
+    }
+
+    @GET @Path(value = "/get/{id : \\d+}")
+    public Response get(@PathParam("id") long id) {
+        if (id < 0) {
+            return getError(400);
+        }
+        Node node = catalogService.get(id);
+        if (node == null) {
+            return getError(404);
+        }
+        return getSuccess(node);
     }
 
     @GET @Path(value = "/gettree/{parentId : \\d+}")

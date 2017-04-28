@@ -1,4 +1,4 @@
-package ru.test;
+package ru.test.entities;
 
 import java.util.Map;
 import java.util.Set;
@@ -9,7 +9,6 @@ public class Node {
     private long parentId;
     private String name;
     private Map<String, String> data;
-    //private Set<Node> children;
 
     public long getId() {
         return id;
@@ -42,12 +41,4 @@ public class Node {
     public void setData(Map<String, String> data) {
         this.data = data;
     }
-
-    /*public Set<Node> getChildren() {
-        return children;
-    }
-
-    public void setChildren(Set<Node> children) {
-        this.children = children;
-    }*/
 }

@@ -1,6 +1,6 @@
 package ru.test.service;
 
-import ru.test.Node;
+import ru.test.entities.Node;
 
 import java.util.List;
 import java.util.Map;
