@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html ng-app="catalog">
+<head>
+    <meta charset="UTF-8">
+    <title>Catalog</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+</head>
+<body>
+<div class="wrapper">
+    <ul ng-controller="nodeController as nodeCtrl">
+        <li ng-repeat="node in nodeCtrl.nodes">
+            <i ng-class="{'expanded': node.isExpanded, 'empty': node.nodes.length === 0}"
+               ng-click="nodeCtrl.expand(node)"></i>
+            <p>{{node.name}}</p>
+            <ul ng-show="node.isExpanded && node.nodes" node-tree></ul>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

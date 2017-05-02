@@ -1,0 +1,6 @@
+<li ng-repeat="node in node.nodes">
+    <i ng-class="{'expanded': node.isExpanded, 'empty': node.nodes.length === 0}"
+       ng-click="nodeCtrl.expand(node)"></i>
+    <p>{{node.name}}</p>
+    <ul ng-show="node.isExpanded && node.nodes" node-tree></ul>
+</li>

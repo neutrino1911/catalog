@@ -1,0 +1,31 @@
+div.wrapper {
+    position: relative;
+    margin: 50px calc(50% - 150px) 0;
+    min-height: 20px;
+}
+
+div.table-wrapper {
+    margin: 50px calc(50% - 210px) 0;
+}
+
+ul {
+    list-style-type: none;
+}
+
+li > i {
+    background: url('../img/plus-16.png') center center no-repeat;
+    float: left;
+    height: 16px;
+    width: 16px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+li > i.expanded {
+    background-image: url('../img/minus-16.png');
+}
+
+li > i.empty {
+    background: none;
+    cursor: default;
+}
