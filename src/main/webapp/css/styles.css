@@ -1,15 +1,30 @@
-div.wrapper {
+ul.wrapper {
     position: relative;
     margin: 50px calc(50% - 150px) 0;
     min-height: 20px;
 }
 
-div.table-wrapper {
-    margin: 50px calc(50% - 210px) 0;
+div.form-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 40px calc(50% - 400px);
+}
+
+div.form {
+    box-sizing: border-box;
+    padding: 38px;
+    background-color: white;
+    width: 800px;
+    height: 600px;
+    border-radius: 10px;
+    border: 2px solid green;
 }
 
 ul {
     list-style-type: none;
+    padding-left: 20px;
 }
 
 li > i {
@@ -28,4 +43,32 @@ li > i.expanded {
 li > i.empty {
     background: none;
     cursor: default;
+}
+
+div > label {
+    box-sizing: border-box;
+    float: left;
+    width: 360px;
+}
+
+input {
+    box-sizing: border-box;
+    float: left;
+}
+
+input.ng-dirty {
+    background-color: lawngreen;
+}
+
+textarea {
+    box-sizing: border-box;
+    width: 360px;
+}
+
+textarea.ng-dirty {
+    background-color: lawngreen;
+}
+
+input[type='text'] {
+    width: 360px;
 }
