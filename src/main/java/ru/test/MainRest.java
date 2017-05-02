@@ -2,7 +2,6 @@ package ru.test;
 
 import javax.ejb.EJB;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,11 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.test.entities.Node;
 import ru.test.service.CatalogService;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
 @Path("/")
 @Produces("application/json; charset=UTF-8")
@@ -49,39 +47,33 @@ public class MainRest {
         return getSuccess(list);
     }
 
-    @PUT @Path(value = "/add/{parentId : \\d+}")
-    @Consumes("application/x-www-form-urlencoded")
-    public Response add(
-            @PathParam("parentId") long parentId,
-            MultivaluedMap<String, String> formParams) {
-        Map<String, String> params = new HashMap<>(formParams.size());
-        params.put("parentId", String.valueOf(parentId));
-        for (String key : formParams.keySet()) {
-            params.put(escapeHtml4(key), escapeHtml4(formParams.getFirst(key)));
-        }
-        boolean status = catalogService.add(params);
-        if (status) {
-            return getSuccess(status);
-        } else {
-            return getError(500);
+    @PUT @Path(value = "/add")
+    @Consumes("application/json;charset=UTF-8")
+    public Response add(String body) {
+        try {
+            Node node = new ObjectMapper().readValue(body, Node.class);
+            if (catalogService.add(node)) {
+                return getSuccess(true);
+            } else {
+                return getError(500);
+            }
+        } catch (IOException e) {
+            return getError(400);
         }
     }
 
-    @PUT @Path(value = "/update/{id : \\d+}")
-    @Consumes("application/x-www-form-urlencoded")
-    public Response update(
-            @PathParam("id") long id,
-            MultivaluedMap<String, String> formParams) {
-        Map<String, String> params = new HashMap<>(formParams.size());
-        params.put("id", String.valueOf(id));
-        for (String key : formParams.keySet()) {
-            params.put(escapeHtml4(key), escapeHtml4(formParams.getFirst(key)));
-        }
-        boolean status = catalogService.update(params);
-        if (status) {
-            return getSuccess(status);
-        } else {
-            return getError(500);
+    @PUT @Path(value = "/update")
+    @Consumes("application/json;charset=UTF-8")
+    public Response update(String body) {
+        try {
+            Node node = new ObjectMapper().readValue(body, Node.class);
+            if (catalogService.update(node)) {
+                return getSuccess(true);
+            } else {
+                return getError(500);
+            }
+        } catch (IOException e) {
+            return getError(400);
         }
     }
 

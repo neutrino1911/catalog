@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Stateless
 @TransactionManagement(value = TransactionManagementType.BEAN)
@@ -18,8 +17,7 @@ public class CatalogServiceImpl implements CatalogService {
     private DataSource dataSource;
 
     @Override
-    public boolean add(Map<String, String> params) {
-        Node node = parseNode(params);
+    public boolean add(Node node) {
         String AIQuery = "SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES" +
                 " WHERE TABLE_SCHEMA = 'catalog' AND TABLE_NAME = 'node'";
         String nodeQuery = "INSERT INTO `node`(`parent_id`, `name`) VALUES (?, ?)";
@@ -35,11 +33,13 @@ public class CatalogServiceImpl implements CatalogService {
             nodeStatement.setLong(1, node.getParentId());
             nodeStatement.setString(2, node.getName());
             nodeStatement.executeUpdate();
-            for (Field field : node.getFields()) {
-                dataStatement.setLong(1, nextId);
-                dataStatement.setString(2, field.getName());
-                dataStatement.setString(3, field.getValue());
-                dataStatement.executeUpdate();
+            if (node.getFields() != null) {
+                for (Field field : node.getFields()) {
+                    dataStatement.setLong(1, nextId);
+                    dataStatement.setString(2, field.getName());
+                    dataStatement.setString(3, field.getValue());
+                    dataStatement.executeUpdate();
+                }
             }
             connection.commit();
         } catch (SQLException e) {
@@ -128,8 +128,7 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public boolean update(Map<String, String> params) {
-        Node node = parseNode(params);
+    public boolean update(Node node) {
         String nodeQuery = "UPDATE `node` SET `parent_id` = ?, `name` = ? WHERE `id` = ?";
         String fieldUpdateQuery = "UPDATE `field` SET `name` = ?, `value` = ? WHERE `id` = ?";
         String fieldInsertQuery = "INSERT INTO `field`(`node_id`, `name`, `value`) VALUES (?, ?, ?)";
@@ -142,20 +141,22 @@ public class CatalogServiceImpl implements CatalogService {
             nodeStatement.setString(2, node.getName());
             nodeStatement.setLong(3, node.getId());
             nodeStatement.executeUpdate();
-            for (Field field : node.getFields()) {
-                if (field.getId() > 0) {
-                    fieldUpdateStatement.setString(1, field.getName());
-                    fieldUpdateStatement.setString(2, field.getValue());
-                    fieldUpdateStatement.setLong(3, field.getId());
-                    int code = fieldUpdateStatement.executeUpdate();
-                    if (code == 0) {
-                        return false;
+            if (node.getFields() != null) {
+                for (Field field : node.getFields()) {
+                    if (field.getId() > 0) {
+                        fieldUpdateStatement.setString(1, field.getName());
+                        fieldUpdateStatement.setString(2, field.getValue());
+                        fieldUpdateStatement.setLong(3, field.getId());
+                        int code = fieldUpdateStatement.executeUpdate();
+                        if (code == 0) {
+                            return false;
+                        }
+                    } else {
+                        fieldInsertStatement.setLong(1, node.getId());
+                        fieldInsertStatement.setString(2, field.getName());
+                        fieldInsertStatement.setString(3, field.getValue());
+                        fieldInsertStatement.executeUpdate();
                     }
-                } else {
-                    fieldInsertStatement.setLong(1, node.getId());
-                    fieldInsertStatement.setString(2, field.getName());
-                    fieldInsertStatement.setString(3, field.getValue());
-                    fieldInsertStatement.executeUpdate();
                 }
             }
             connection.commit();
@@ -163,34 +164,6 @@ public class CatalogServiceImpl implements CatalogService {
             return false;
         }
         return true;
-    }
-
-    private Node parseNode(Map<String, String> params) {
-        Node node = new Node();
-        if (params.containsKey("id")) {
-            node.setId(Long.valueOf(params.get("id")));
-        }
-        node.setParentId(Long.valueOf(params.get("parentId")));
-        node.setName(params.get("name"));
-        List<Field> list = new ArrayList<>(params.size());
-        node.setFields(list);
-        for (String key : params.keySet()) {
-            if (key.matches("f\\d+")) {
-                String value = params.get(key.replace('f', 'v'));
-                if (value != null) {
-                    Field field = new Field();
-                    String id = params.get(key.replace('f', 'n'));
-                    if (id != null) {
-                        field.setId(Long.valueOf(id));
-                    }
-                    field.setNodeId(node.getId());
-                    field.setName(params.get(key));
-                    field.setValue(value);
-                    list.add(field);
-                }
-            }
-        }
-        return node;
     }
 
     private boolean removeById(String query, long id) {
