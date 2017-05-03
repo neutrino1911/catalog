@@ -103,7 +103,7 @@ div > label {
     float: left;
     width: 340px;
     text-align: right;
-    right: 20px;
+    margin-right: 20px;
 }
 
 input {

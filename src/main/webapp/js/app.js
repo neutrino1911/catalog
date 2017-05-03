@@ -16,9 +16,10 @@
 
         catalog.expand = function (node) {
             node.isExpanded = !node.isExpanded;
-            if (node.isExpanded && !node.nodes) {
-                node.nodes = [];
+            node.nodes = [];
+            if (node.isExpanded) {
                 $http.get('api/gettree/' + node.id).then(function (response) {
+                    console.log(response.data.result);
                     node.nodes = response.data.result;
                 });
             }
@@ -37,8 +38,9 @@
         catalog.cancel = function () {
             if (!confirm('Закрыть без сохранения?')) return;
             catalog.isFormShow = false;
-            catalog.activeNode = [];
-            catalog.newNode = [];
+            catalog.activeNode.fields = [];
+            catalog.activeNode = {};
+            catalog.newNode = {};
             var classList = document.getElementById('input-name-field').classList;
             classList.remove('ng-dirty');
             classList.add('ng-pristine');
@@ -47,23 +49,21 @@
         catalog.saveNode = function () {
             if (catalog.isAdding) {
                 if (!confirm('Сохранить ' + catalog.newNode.name + '?')) return;
+                catalog.isFormShow = false;
                 $http.put('api/add', catalog.newNode).then(function (response) {
-                    catalog.isFormShow = false;
                     var parent = catalog.getParent(catalog, catalog.newNode);
-                    if (parent.isExpanded && typeof parent.nodes === 'undefined') {
-                        parent.nodes = [];
-                    }
-                    if (typeof parent.nodes !== 'undefined') {
-                        parent.nodes.push(catalog.newNode);
+                    if (parent.isExpanded) {
+                        parent.nodes.push(response.data.result);
                     }
                     catalog.newNode = {};
-                    console.log(catalog.newNode);
+                    console.log(response.data.result);
                     var classList = document.getElementById('input-name-field').classList;
                     classList.remove('ng-dirty');
                     classList.add('ng-pristine');
                 });
             } else {
-                if (!confirm('Сохранить изменения в ' + catalog.newNode.name + '?')) return;
+                if (!confirm('Сохранить изменения в ' + catalog.activeNode.name + '?')) return;
+                catalog.isFormShow = false;
                 var fields = catalog.activeNode.fields;
                 var newFields = catalog.newNode.fields;
                 for (var i = 0; i < fields.length; i++) {
@@ -77,10 +77,13 @@
                         $http.delete('api/removefield/' + fields[i].id);
                     }
                 }
+                console.log(JSON.stringify(catalog.newNode));
                 $http.put('api/update', catalog.newNode).then(function (response) {
-                    catalog.isFormShow = false;
-                    catalog.activeNode.name = catalog.newNode.name;
-                    catalog.activeNode.fields = catalog.newNode.fields;
+                    var node = response.data.result;
+                    console.log(node);
+                    catalog.activeNode.parentId = node.parentId;
+                    catalog.activeNode.name = node.name;
+                    catalog.activeNode.fields = [];
                     var classList = document.getElementById('input-name-field').classList;
                     classList.remove('ng-dirty');
                     classList.add('ng-pristine');
@@ -98,7 +101,6 @@
         catalog.removeNode = function (node) {
             if (!confirm('Удалить запись ' + node.name + '?')) return;
             $http.delete('api/remove/' + node.id).then(function (response) {
-                console.log(response);
                 if (response.data.result === true) {
                     var parent = catalog.getParent(catalog, node);
                     var index = parent.nodes.indexOf(node);
@@ -116,20 +118,8 @@
         };
 
         catalog.removeField = function (field) {
-            //if (catalog.isAdding) {
-                var index = catalog.newNode.fields.indexOf(field);
-                catalog.newNode.fields.splice(index, 1);
-            /*} else {
-                if (typeof field.id === 'undefined') return;
-                if (!confirm('Удалить поле ' + field.name + '?')) return;
-                $http.delete('api/removefield/' + field.id).then(function (response) {
-                    console.log(response);
-                    if (response.data.result === true) {
-                        var index = catalog.newNode.fields.indexOf(field);
-                        catalog.newNode.fields.splice(index, 1);
-                    }
-                })
-            }*/
+            var index = catalog.newNode.fields.indexOf(field);
+            catalog.newNode.fields.splice(index, 1);
         };
 
         catalog.getParent = function (parent, node) {

@@ -17,7 +17,7 @@ public class CatalogServiceImpl implements CatalogService {
     private DataSource dataSource;
 
     @Override
-    public boolean add(Node node) {
+    public Node add(Node node) {
         String AIQuery = "SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES" +
                 " WHERE TABLE_SCHEMA = 'catalog' AND TABLE_NAME = 'node'";
         String nodeQuery = "INSERT INTO `node`(`parent_id`, `name`) VALUES (?, ?)";
@@ -30,7 +30,12 @@ public class CatalogServiceImpl implements CatalogService {
             ResultSet resultSet = AIStatement.executeQuery();
             resultSet.next();
             long nextId = resultSet.getLong(1);
-            nodeStatement.setLong(1, node.getParentId());
+            node.setId(nextId);
+            if (node.getParentId() == 0) {
+                nodeStatement.setNull(1, Types.BIGINT);
+            } else {
+                nodeStatement.setLong(1, node.getParentId());
+            }
             nodeStatement.setString(2, node.getName());
             nodeStatement.executeUpdate();
             if (node.getFields() != null) {
@@ -41,11 +46,12 @@ public class CatalogServiceImpl implements CatalogService {
                     dataStatement.executeUpdate();
                 }
             }
+            node.setFields(new ArrayList<Field>());
             connection.commit();
         } catch (SQLException e) {
-            return false;
+            return null;
         }
-        return true;
+        return node;
     }
 
     @Override
@@ -102,10 +108,11 @@ public class CatalogServiceImpl implements CatalogService {
                 node.setId(resultSet.getLong("id"));
                 node.setParentId(parentId);
                 node.setName(resultSet.getString("name"));
+                node.setFields(new ArrayList<Field>());
                 list.add(node);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            return null;
         }
         return list;
     }
@@ -128,7 +135,7 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public boolean update(Node node) {
+    public Node update(Node node) {
         String nodeQuery = "UPDATE `node` SET `parent_id` = ?, `name` = ? WHERE `id` = ?";
         String fieldUpdateQuery = "UPDATE `field` SET `name` = ?, `value` = ? WHERE `id` = ?";
         String fieldInsertQuery = "INSERT INTO `field`(`node_id`, `name`, `value`) VALUES (?, ?, ?)";
@@ -153,7 +160,7 @@ public class CatalogServiceImpl implements CatalogService {
                         fieldUpdateStatement.setLong(3, field.getId());
                         int code = fieldUpdateStatement.executeUpdate();
                         if (code == 0) {
-                            return false;
+                            return null;
                         }
                     } else {
                         fieldInsertStatement.setLong(1, node.getId());
@@ -163,11 +170,12 @@ public class CatalogServiceImpl implements CatalogService {
                     }
                 }
             }
+            node.setFields(new ArrayList<Field>());
             connection.commit();
         } catch (SQLException e) {
-            return false;
+            return null;
         }
-        return true;
+        return node;
     }
 
     private boolean removeById(String query, long id) {

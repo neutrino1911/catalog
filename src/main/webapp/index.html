@@ -11,7 +11,7 @@
 <ul class="wrapper">
     <li ng-repeat="node in nodeCtrl.nodes">
         <p></p>
-        <i ng-class="{'expand': true, 'expanded': node.isExpanded, 'empty': node.nodes.length === 0}"
+        <i ng-class="{'expand': true, 'expanded': node.isExpanded}"
            ng-click="nodeCtrl.expand(node)"></i>
         <div ng-click="nodeCtrl.editNode(node)">{{node.name|limitTo:16}}</div>
         <i ng-class="{'add': true}" ng-click="nodeCtrl.addNode(node)"></i>

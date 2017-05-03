@@ -41,8 +41,8 @@ public class MainRest {
             return getError(400);
         }
         List<Node> list = catalogService.getTree(parentId);
-        if (list.isEmpty()) {
-            return getError(404);
+        if (list == null) {
+            return getError(500);
         }
         return getSuccess(list);
     }
@@ -52,8 +52,9 @@ public class MainRest {
     public Response add(String body) {
         try {
             Node node = new ObjectMapper().readValue(body, Node.class);
-            if (catalogService.add(node)) {
-                return getSuccess(true);
+            if (node.getParentId() < 0) return getError(400);
+            if (catalogService.add(node) != null) {
+                return getSuccess(node);
             } else {
                 return getError(500);
             }
@@ -67,8 +68,10 @@ public class MainRest {
     public Response update(String body) {
         try {
             Node node = new ObjectMapper().readValue(body, Node.class);
-            if (catalogService.update(node)) {
-                return getSuccess(true);
+            if (node.getId() < 1) return getError(400);
+            if (node.getParentId() < 0) return getError(400);
+            if (catalogService.update(node) != null) {
+                return getSuccess(node);
             } else {
                 return getError(500);
             }

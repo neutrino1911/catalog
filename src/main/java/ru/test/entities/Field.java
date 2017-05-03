@@ -1,5 +1,8 @@
 package ru.test.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Field {
 
     private long id;
