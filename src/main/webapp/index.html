@@ -13,7 +13,7 @@
         <p></p>
         <i ng-class="{'expand': true, 'expanded': node.isExpanded, 'empty': node.nodes.length === 0}"
            ng-click="nodeCtrl.expand(node)"></i>
-        <div ng-click="nodeCtrl.edit(node)">{{node.name|limitTo:16}}</div>
+        <div ng-click="nodeCtrl.editNode(node)">{{node.name|limitTo:16}}</div>
         <i ng-class="{'add': true}" ng-click="nodeCtrl.addNode(node)"></i>
         <i ng-class="{'remove': true}" ng-click="nodeCtrl.removeNode(node)"></i>
         <ul ng-show="node.isExpanded && node.nodes" node-tree></ul>
@@ -21,17 +21,19 @@
 </ul>
 <div class="form-wrapper" ng-show="nodeCtrl.isFormShow">
     <div class="form">
-        <form name="nodeForm">
-            <div>
+        <form class="node-form" name="nodeForm">
+            <div class="field-wrapper">
                 <label>Name:</label>
                 <input id="input-name-field" ng-model="nodeCtrl.newNode.name" type="text"/>
             </div>
-            <div ng-repeat="nodeField in nodeCtrl.newNode.fields">
+            <div class="field-wrapper" ng-repeat="nodeField in nodeCtrl.newNode.fields">
                 <input ng-model="nodeField.name" type="text"/>
                 <textarea ng-model="nodeField.value"></textarea>
+                <div class="field-remove" ng-click="nodeCtrl.removeField(nodeField)"></div>
             </div>
-            <input ng-click="nodeCtrl.saveNode()" type="button" value="Save"/>
             <input ng-click="nodeCtrl.cancel()" type="button" value="Cancel"/>
+            <input ng-click="nodeCtrl.saveNode()" type="button" value="Save"/>
+            <div class="field-add" ng-click="nodeCtrl.addField()"></div>
         </form>
     </div>
 </div>

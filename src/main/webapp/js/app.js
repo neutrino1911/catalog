@@ -24,7 +24,7 @@
             }
         };
 
-        catalog.edit = function (node) {
+        catalog.editNode = function (node) {
             catalog.isAdding = false;
             $http.get('api/get/' + node.id).then(function (response) {
                 node.fields = response.data.result.fields;
@@ -62,8 +62,21 @@
                     classList.remove('ng-dirty');
                     classList.add('ng-pristine');
                 });
-            }else {
+            } else {
                 if (!confirm('Сохранить изменения в ' + catalog.newNode.name + '?')) return;
+                var fields = catalog.activeNode.fields;
+                var newFields = catalog.newNode.fields;
+                for (var i = 0; i < fields.length; i++) {
+                    var founded = false;
+                    for(var j = 0; j < newFields.length; j++) {
+                        if (fields[i].id === newFields[j].id) {
+                            founded = true;
+                        }
+                    }
+                    if (!founded) {
+                        $http.delete('api/removefield/' + fields[i].id);
+                    }
+                }
                 $http.put('api/update', catalog.newNode).then(function (response) {
                     catalog.isFormShow = false;
                     catalog.activeNode.name = catalog.newNode.name;
@@ -79,6 +92,7 @@
             catalog.isAdding = true;
             catalog.isFormShow = true;
             catalog.newNode.parentId = parentNode.id;
+            catalog.newNode.fields = [];
         };
 
         catalog.removeNode = function (node) {
@@ -91,6 +105,31 @@
                     parent.nodes.splice(index, 1);
                 }
             });
+        };
+
+        catalog.addField = function () {
+            catalog.newNode.fields.push({
+                'nodeId': catalog.newNode.id,
+                'name': '',
+                'value': ''
+            });
+        };
+
+        catalog.removeField = function (field) {
+            //if (catalog.isAdding) {
+                var index = catalog.newNode.fields.indexOf(field);
+                catalog.newNode.fields.splice(index, 1);
+            /*} else {
+                if (typeof field.id === 'undefined') return;
+                if (!confirm('Удалить поле ' + field.name + '?')) return;
+                $http.delete('api/removefield/' + field.id).then(function (response) {
+                    console.log(response);
+                    if (response.data.result === true) {
+                        var index = catalog.newNode.fields.indexOf(field);
+                        catalog.newNode.fields.splice(index, 1);
+                    }
+                })
+            }*/
         };
 
         catalog.getParent = function (parent, node) {

@@ -22,6 +22,32 @@ div.form {
     border: 2px solid black;
 }
 
+div.field-wrapper {
+    float: left;
+    margin-bottom: 10px;
+    min-height: 21px;
+}
+
+div.field-add {
+    box-sizing: border-box;
+    background: url(../img/add-16.png) no-repeat center center;
+    width: 16px;
+    float: right;
+    height: 16px;
+    position: relative;
+}
+
+div.field-remove {
+    box-sizing: border-box;
+    background: url(../img/remove-16.png) no-repeat center center;
+    margin-left: 4px;
+    margin-top: 2px;
+    width: 16px;
+    float: left;
+    height: 16px;
+    position: relative;
+}
+
 ul {
     list-style-type: none;
     padding-left: 20px;
@@ -36,6 +62,10 @@ li > div {
     float: left;
     margin-right: 8px;
     cursor: pointer;
+}
+
+li > div:hover {
+    background-color: lightgreen;
 }
 
 li > i {
@@ -71,7 +101,9 @@ li > i.remove {
 div > label {
     box-sizing: border-box;
     float: left;
-    width: 360px;
+    width: 340px;
+    text-align: right;
+    right: 20px;
 }
 
 input {
@@ -85,7 +117,10 @@ input.ng-dirty {
 
 textarea {
     box-sizing: border-box;
-    width: 360px;
+    float: left;
+    width: 340px;
+    resize: vertical;
+    margin-left: 20px;
 }
 
 textarea.ng-dirty {
@@ -93,5 +128,10 @@ textarea.ng-dirty {
 }
 
 input[type='text'] {
-    width: 360px;
+    width: 340px;
+}
+
+form.node-form > input[type='button'] {
+    float: right;
+    margin-left: 20px;
 }

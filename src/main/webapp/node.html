@@ -2,7 +2,7 @@
     <p></p>
     <i ng-class="{'expand': true, 'expanded': node.isExpanded, 'empty': node.nodes.length === 0}"
        ng-click="nodeCtrl.expand(node)"></i>
-    <div ng-click="nodeCtrl.edit(node)">{{node.name|limitTo:16}}</div>
+    <div ng-click="nodeCtrl.editNode(node)">{{node.name|limitTo:16}}</div>
     <i ng-class="{'add': true}" ng-click="nodeCtrl.addNode(node)"></i>
     <i ng-class="{'remove': true}" ng-click="nodeCtrl.removeNode(node)"></i>
     <ul ng-show="node.isExpanded && node.nodes" node-tree></ul>
