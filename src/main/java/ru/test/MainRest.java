@@ -82,9 +82,8 @@ public class MainRest {
         if (id < 0) {
             return getError(400);
         }
-        boolean status = catalogService.remove(id);
-        if (status) {
-            return getSuccess(status);
+        if (catalogService.remove(id)) {
+            return getSuccess(true);
         } else {
             return getError(404);
         }

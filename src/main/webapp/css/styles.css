@@ -27,22 +27,45 @@ ul {
     padding-left: 20px;
 }
 
+li > p {
+    width: 100%;
+    height: 16px;
+}
+
+li > div {
+    float: left;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
 li > i {
-    background: url('../img/plus-16.png') center center no-repeat;
     float: left;
     height: 16px;
     width: 16px;
     cursor: pointer;
     margin-right: 8px;
+    background: no-repeat center center;
 }
 
-li > i.expanded {
+li > i.expand {
+    background-image: url('../img/plus-16.png');
+}
+
+li > i.expand.expanded {
     background-image: url('../img/minus-16.png');
 }
 
-li > i.empty {
-    background: none;
+li > i.expand.empty {
+    background-image: none;
     cursor: default;
+}
+
+li > i.add {
+    background-image: url('../img/add-16.png');
+}
+
+li > i.remove {
+    background-image: url('../img/remove-16.png');
 }
 
 div > label {

@@ -137,7 +137,11 @@ public class CatalogServiceImpl implements CatalogService {
              PreparedStatement fieldUpdateStatement = connection.prepareStatement(fieldUpdateQuery);
              PreparedStatement fieldInsertStatement = connection.prepareStatement(fieldInsertQuery)) {
             connection.setAutoCommit(false);
-            nodeStatement.setLong(1, node.getParentId());
+            if (node.getParentId() == 0) {
+                nodeStatement.setNull(1, Types.BIGINT);
+            } else {
+                nodeStatement.setLong(1, node.getParentId());
+            }
             nodeStatement.setString(2, node.getName());
             nodeStatement.setLong(3, node.getId());
             nodeStatement.executeUpdate();
