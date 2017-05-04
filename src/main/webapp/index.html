@@ -13,19 +13,11 @@
     <i ng-class="{'remove': true}" ng-click="nodeCtrl.clearFind()"></i>
     <input type="button" value="Поиск" ng-click="nodeCtrl.find()">
 </div>
-<ul class="tree-wrapper">
+<div class="tree tree-wrapper">
     <p></p>
     <i ng-class="{'add': true}" ng-click="nodeCtrl.addNode(nodeCtrl)"></i>
-    <li ng-repeat="node in nodeCtrl.nodes">
-        <p></p>
-        <i ng-class="{'expand': true, 'expanded': node.isExpanded}"
-           ng-click="nodeCtrl.expand(node)"></i>
-        <div ng-click="nodeCtrl.editNode(node)">{{node.name|limitTo:16}}</div>
-        <i ng-class="{'add': true}" ng-click="nodeCtrl.addNode(node)"></i>
-        <i ng-class="{'remove': true}" ng-click="nodeCtrl.removeNode(node)"></i>
-        <ul ng-show="node.isExpanded && node.nodes" node-tree></ul>
-    </li>
-</ul>
+    <ul node-tree></ul>
+</div>
 <div class="form-wrapper" ng-show="nodeCtrl.isFormShow">
     <div class="form">
         <form class="node-form" name="nodeForm">
@@ -38,14 +30,18 @@
                 <textarea ng-model="nodeField.value"></textarea>
                 <div class="field-remove" ng-click="nodeCtrl.removeField(nodeField)"></div>
             </div>
-            <input ng-click="nodeCtrl.cancel()" type="button" value="Cancel"/>
-            <input ng-click="nodeCtrl.saveNode()" type="button" value="Save"/>
-            <div class="field-add" ng-click="nodeCtrl.addField()"></div>
+            <input ng-click="nodeCtrl.cancel()" type="button" value="Отмена"/>
+            <input ng-click="nodeCtrl.saveNode()" type="button" value="Сохранить"/>
+            <input ng-click="nodeCtrl.addField()" type="button" value="Добавить поле"/>
+            <input ng-click="nodeCtrl.selectNewParent()" type="button" value="Сменить родителя"/>
         </form>
     </div>
 </div>
-<div class="tree-select-wrapper">
-
+<div class="tree tree-select-wrapper" ng-show="nodeCtrl.isWireFormShow">
+    <div class="form">
+        <p ng-click="nodeCtrl.wireNode()">Корень</p>
+        <ul wire-tree></ul>
+    </div>
 </div>
 </body>
 </html>

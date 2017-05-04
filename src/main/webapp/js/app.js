@@ -1,19 +1,23 @@
 (function () {
     var app = angular.module('catalog', []);
 
-    app.controller('nodeController', ['$http', function ($http) {
+    app.controller('nodeController', ['$scope', '$http', function ($scope, $http) {
         var catalog = this;
+        $scope.node = catalog;
 
         catalog.activeNode = {};
         catalog.newNode = {};
+        catalog.oldNodes = [];
         catalog.nodes = [];
 
         catalog.isExpanded = true;
         catalog.isAdding = false;
-        catalog.isFind = false;
 
-        catalog.oldNodes = [];
+        catalog.isFind = false;
         catalog.findQuery = '';
+
+        catalog.isWireFormShow = false;
+        catalog.newParent = {};
 
         $http.get('api/gettree/0').then(function (response) {
             catalog.nodes = response.data.result;
@@ -24,10 +28,25 @@
             node.nodes = [];
             if (node.isExpanded) {
                 $http.get('api/gettree/' + node.id).then(function (response) {
-                    console.log(response.data.result);
+                    //console.log(response.data.result);
                     node.nodes = response.data.result;
                 });
             }
+        };
+
+        catalog.selectNewParent = function () {
+            catalog.isWireFormShow = true;
+        };
+
+        catalog.wireNode = function (node) {
+            if (typeof node === 'undefined') {
+                catalog.newNode.parentId = 0;
+                catalog.newParent = catalog;
+            } else {
+                catalog.newNode.parentId = node.id;
+                catalog.newParent = node;
+            }
+            catalog.isWireFormShow = false;
         };
 
         catalog.editNode = function (node) {
@@ -80,7 +99,7 @@
                         parent.nodes.push(response.data.result);
                     }
                     catalog.newNode = {};
-                    console.log(response.data.result);
+                    //console.log(response.data.result);
                     var classList = document.getElementById('input-name-field').classList;
                     classList.remove('ng-dirty');
                     classList.add('ng-pristine');
@@ -101,13 +120,23 @@
                         $http.delete('api/removefield/' + fields[i].id);
                     }
                 }
-                console.log(JSON.stringify(catalog.newNode));
+                //console.log(JSON.stringify(catalog.newNode));
                 $http.put('api/update', catalog.newNode).then(function (response) {
                     var node = response.data.result;
-                    console.log(node);
-                    catalog.activeNode.parentId = node.parentId;
-                    catalog.activeNode.name = node.name;
-                    catalog.activeNode.fields = [];
+                    //console.log(node);
+                    if (catalog.activeNode.parentId !== node.parentId) {
+                        var oldParent = catalog.getParent(catalog, catalog.activeNode.parentId);
+                        var index = oldParent.nodes.indexOf(catalog.activeNode);
+                        oldParent.nodes.splice(index, 1);
+                        var newParent = catalog.newParent;
+                        newParent.nodes.push(node);
+                        catalog.activeNode.parentId = node.parentId;
+                    } else {
+                        catalog.activeNode.name = node.name;
+                        catalog.activeNode.fields = [];
+                    }
+                    catalog.activeNode = {};
+                    catalog.newNode = {};
                     var classList = document.getElementById('input-name-field').classList;
                     classList.remove('ng-dirty');
                     classList.add('ng-pristine');
@@ -165,6 +194,13 @@
         return {
             restrict: 'A',
             templateUrl: 'node.html'
+        };
+    });
+
+    app.directive('wireTree', function () {
+        return {
+            restrict: 'A',
+            templateUrl: 'wire.html'
         };
     });
 })();

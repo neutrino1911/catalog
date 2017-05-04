@@ -22,7 +22,7 @@ div.find-wrapper > i {
     background: url(../img/clear-14.png) no-repeat center center;
 }
 
-ul.tree-wrapper {
+div.tree-wrapper {
     position: relative;
     margin: 0 calc(50% - 150px);
     min-height: 20px;
@@ -53,15 +53,6 @@ div.field-wrapper {
     min-height: 21px;
 }
 
-div.field-add {
-    box-sizing: border-box;
-    background: url(../img/add-16.png) no-repeat center center;
-    width: 16px;
-    float: right;
-    height: 16px;
-    position: relative;
-}
-
 div.field-remove {
     box-sizing: border-box;
     background: url(../img/remove-16.png) no-repeat center center;
@@ -78,7 +69,7 @@ ul {
     padding-left: 20px;
 }
 
-ul.tree-wrapper p {
+div.tree p {
     width: 100%;
     height: 16px;
 }
@@ -93,7 +84,11 @@ li > div:hover {
     background-color: lightgreen;
 }
 
-ul.tree-wrapper i {
+div.tree > i {
+    margin-left: 20px;
+}
+
+div.tree i {
     float: left;
     height: 16px;
     width: 16px;
@@ -102,24 +97,24 @@ ul.tree-wrapper i {
     background: no-repeat center center;
 }
 
-ul.tree-wrapper i.expand {
+div.tree i.expand {
     background-image: url('../img/plus-16.png');
 }
 
-ul.tree-wrapper i.expand.expanded {
+div.tree i.expand.expanded {
     background-image: url('../img/minus-16.png');
 }
 
-ul.tree-wrapper i.expand.empty {
+div.tree i.expand.empty {
     background-image: none;
     cursor: default;
 }
 
-ul.tree-wrapper i.add {
+div.tree i.add {
     background-image: url('../img/add-16.png');
 }
 
-ul.tree-wrapper i.remove {
+div.tree i.remove {
     background-image: url('../img/remove-16.png');
 }
 
@@ -158,5 +153,29 @@ input[type='text'] {
 
 form.node-form > input[type='button'] {
     float: right;
-    margin-left: 20px;
+    margin-right: 20px;
+}
+
+div.tree-select-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 40px calc(50% - 400px);
+    z-index: 3;
+}
+
+div.tree-select-wrapper .form > p {
+    cursor: pointer;
+}
+
+div.tree-select-wrapper .form > p:hover {
+    background-color: lightgreen;
+}
+
+div.tree-select-wrapper .form div {
+    float: none;
+    margin-bottom: 8px;
+    margin-right: 8px;
+    cursor: pointer;
 }
