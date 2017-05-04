@@ -8,7 +8,14 @@
     <script type="text/javascript" src="js/app.js"></script>
 </head>
 <body ng-controller="nodeController as nodeCtrl">
-<ul class="wrapper">
+<div class="find-wrapper">
+    <input id="find-input" type="text" ng-model="nodeCtrl.findQuery">
+    <i ng-class="{'remove': true}" ng-click="nodeCtrl.clearFind()"></i>
+    <input type="button" value="Поиск" ng-click="nodeCtrl.find()">
+</div>
+<ul class="tree-wrapper">
+    <p></p>
+    <i ng-class="{'add': true}" ng-click="nodeCtrl.addNode(nodeCtrl)"></i>
     <li ng-repeat="node in nodeCtrl.nodes">
         <p></p>
         <i ng-class="{'expand': true, 'expanded': node.isExpanded}"
@@ -36,6 +43,9 @@
             <div class="field-add" ng-click="nodeCtrl.addField()"></div>
         </form>
     </div>
+</div>
+<div class="tree-select-wrapper">
+
 </div>
 </body>
 </html>

@@ -55,6 +55,27 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
+    public List<Node> find(String text) {
+        String findQuery = "SELECT `id`, `parent_id`, `name` FROM `node` WHERE `name` LIKE ?";
+        List<Node> nodes = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement nodeStatement = connection.prepareStatement(findQuery)) {
+            nodeStatement.setString(1, "%" + text + "%");
+            ResultSet resultSet = nodeStatement.executeQuery();
+            while (resultSet.next()) {
+                Node node = new Node();
+                node.setId(resultSet.getLong("id"));
+                node.setParentId(resultSet.getLong("parent_id"));
+                node.setName(resultSet.getString("name"));
+                nodes.add(node);
+            }
+        } catch (SQLException e) {
+            return null;
+        }
+        return nodes;
+    }
+
+    @Override
     public Node get(long nodeId) {
         String nodeQuery = "SELECT `parent_id`, `name` FROM `node` WHERE `id` = ?";
         String fieldQuery = "SELECT `id`, `name`, `value` FROM `field` WHERE `node_id` = ?";
@@ -62,7 +83,6 @@ public class CatalogServiceImpl implements CatalogService {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement nodeStatement = connection.prepareStatement(nodeQuery);
              PreparedStatement dataStatement = connection.prepareStatement(fieldQuery)) {
-            connection.setAutoCommit(false);
             nodeStatement.setLong(1, nodeId);
             ResultSet resultSet = nodeStatement.executeQuery();
             resultSet.next();
@@ -80,7 +100,6 @@ public class CatalogServiceImpl implements CatalogService {
                 ));
             }
             node.setFields(list);
-            connection.commit();
         } catch (SQLException e) {
             return null;
         }

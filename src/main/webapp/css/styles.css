@@ -1,6 +1,30 @@
-ul.wrapper {
+div.find-wrapper {
     position: relative;
-    margin: 50px calc(50% - 150px) 0;
+    height: 21px;
+    margin-left: calc(50% - 130px);
+    margin-top: 40px;
+    z-index: 1;
+}
+
+div.find-wrapper > input[type='text'] {
+    width: 160px;
+}
+
+div.find-wrapper > input[type='button'] {
+    margin-left: 20px;
+}
+
+div.find-wrapper > i {
+    width: 21px;
+    height: 21px;
+    position: absolute;
+    left: 140px;
+    background: url(../img/clear-14.png) no-repeat center center;
+}
+
+ul.tree-wrapper {
+    position: relative;
+    margin: 0 calc(50% - 150px);
     min-height: 20px;
 }
 
@@ -10,6 +34,7 @@ div.form-wrapper {
     left: 0;
     width: 100%;
     padding: 40px calc(50% - 400px);
+    z-index: 2;
 }
 
 div.form {
@@ -53,7 +78,7 @@ ul {
     padding-left: 20px;
 }
 
-li > p {
+ul.tree-wrapper p {
     width: 100%;
     height: 16px;
 }
@@ -68,7 +93,7 @@ li > div:hover {
     background-color: lightgreen;
 }
 
-li > i {
+ul.tree-wrapper i {
     float: left;
     height: 16px;
     width: 16px;
@@ -77,24 +102,24 @@ li > i {
     background: no-repeat center center;
 }
 
-li > i.expand {
+ul.tree-wrapper i.expand {
     background-image: url('../img/plus-16.png');
 }
 
-li > i.expand.expanded {
+ul.tree-wrapper i.expand.expanded {
     background-image: url('../img/minus-16.png');
 }
 
-li > i.expand.empty {
+ul.tree-wrapper i.expand.empty {
     background-image: none;
     cursor: default;
 }
 
-li > i.add {
+ul.tree-wrapper i.add {
     background-image: url('../img/add-16.png');
 }
 
-li > i.remove {
+ul.tree-wrapper i.remove {
     background-image: url('../img/remove-16.png');
 }
 
@@ -111,7 +136,7 @@ input {
     float: left;
 }
 
-input.ng-dirty {
+form.node-form input[type='text'].ng-dirty {
     background-color: lightgreen;
 }
 
@@ -123,7 +148,7 @@ textarea {
     margin-left: 20px;
 }
 
-textarea.ng-dirty {
+form.node-form textarea.ng-dirty {
     background-color: lightgreen;
 }
 

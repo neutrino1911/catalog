@@ -47,6 +47,18 @@ public class MainRest {
         return getSuccess(list);
     }
 
+    @GET @Path(value = "/find")
+    public Response find(@QueryParam("q") String text) {
+        if (text == null || text.isEmpty()) {
+            return getError(400);
+        }
+        List<Node> nodes = catalogService.find(text);
+        if (nodes == null) {
+            return getError(404);
+        }
+        return getSuccess(nodes);
+    }
+
     @PUT @Path(value = "/add")
     @Consumes("application/json;charset=UTF-8")
     public Response add(String body) {

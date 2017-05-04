@@ -7,6 +7,7 @@ import java.util.List;
 public interface CatalogService {
 
     Node add (Node node);
+    List<Node> find(String text);
     Node get(long id);
     List<Node> getTree(long parentId);
     boolean remove(long id);

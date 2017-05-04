@@ -8,7 +8,12 @@
         catalog.newNode = {};
         catalog.nodes = [];
 
+        catalog.isExpanded = true;
         catalog.isAdding = false;
+        catalog.isFind = false;
+
+        catalog.oldNodes = [];
+        catalog.findQuery = '';
 
         $http.get('api/gettree/0').then(function (response) {
             catalog.nodes = response.data.result;
@@ -35,6 +40,25 @@
             });
         };
 
+        catalog.find = function () {
+            catalog.isFind = true;
+            $http.get('api/find?q=' + catalog.findQuery).then(function (response) {
+                if (catalog.oldNodes.length === 0) {
+                    catalog.oldNodes = catalog.nodes;
+                }
+                catalog.nodes = response.data.result;
+            });
+        };
+
+        catalog.clearFind = function () {
+            catalog.isFind = false;
+            catalog.findQuery = '';
+            if (catalog.oldNodes.length !== 0) {
+                catalog.nodes = catalog.oldNodes;
+                catalog.oldNodes = [];
+            }
+        };
+
         catalog.cancel = function () {
             if (!confirm('Закрыть без сохранения?')) return;
             catalog.isFormShow = false;
@@ -51,7 +75,7 @@
                 if (!confirm('Сохранить ' + catalog.newNode.name + '?')) return;
                 catalog.isFormShow = false;
                 $http.put('api/add', catalog.newNode).then(function (response) {
-                    var parent = catalog.getParent(catalog, catalog.newNode);
+                    var parent = catalog.getParent(catalog, catalog.newNode.parentId);
                     if (parent.isExpanded) {
                         parent.nodes.push(response.data.result);
                     }
@@ -102,7 +126,7 @@
             if (!confirm('Удалить запись ' + node.name + '?')) return;
             $http.delete('api/remove/' + node.id).then(function (response) {
                 if (response.data.result === true) {
-                    var parent = catalog.getParent(catalog, node);
+                    var parent = catalog.getParent(catalog, node.parentId);
                     var index = parent.nodes.indexOf(node);
                     parent.nodes.splice(index, 1);
                 }
@@ -122,12 +146,13 @@
             catalog.newNode.fields.splice(index, 1);
         };
 
-        catalog.getParent = function (parent, node) {
-            if (node.parentId === 0) return catalog;
-            if (parent.id === node.parentId) return parent;
+        catalog.getParent = function (parent, parentId) {
+            if (catalog.isFind) return catalog;
+            if (parentId === 0) return catalog;
+            if (parent.id === parentId) return parent;
             if (typeof parent.nodes === 'undefined') return false;
             for (var i = 0; i < parent.nodes.length; i++) {
-                var p = catalog.getParent(parent.nodes[i], node);
+                var p = catalog.getParent(parent.nodes[i], parentId);
                 if (p !== false) {
                     return p;
                 }
