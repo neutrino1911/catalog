@@ -1,6 +1,6 @@
 <li ng-repeat="node in node.nodes" ng-hide="node.id === nodeCtrl.newNode.id">
     <i ng-class="{'expand': true, 'expanded': node.isExpanded}"
        ng-click="nodeCtrl.expand(node)"></i>
-    <div ng-click="nodeCtrl.wireNode(node)">{{node.name|limitTo:16}}</div>
+    <div ng-click="nodeCtrl.setParent(node)">{{node.name|limitTo:16}}</div>
     <ul ng-show="node.isExpanded && node.nodes" wire-tree></ul>
 </li>

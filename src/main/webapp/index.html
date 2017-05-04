@@ -37,10 +37,11 @@
         </form>
     </div>
 </div>
-<div class="tree tree-select-wrapper" ng-show="nodeCtrl.isWireFormShow">
+<div class="tree tree-select-wrapper" ng-show="nodeCtrl.isParentFormShow">
     <div class="form">
         <p ng-click="nodeCtrl.wireNode()">Корень</p>
         <ul wire-tree></ul>
+        <input ng-click="nodeCtrl.cancelParent()" type="button" value="Отмена"/>
     </div>
 </div>
 </body>

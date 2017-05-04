@@ -14,9 +14,10 @@
         catalog.isAdding = false;
 
         catalog.isFind = false;
+        catalog.findNodes = [];
         catalog.findQuery = '';
 
-        catalog.isWireFormShow = false;
+        catalog.isParentFormShow = false;
         catalog.newParent = {};
 
         $http.get('api/gettree/0').then(function (response) {
@@ -35,18 +36,33 @@
         };
 
         catalog.selectNewParent = function () {
-            catalog.isWireFormShow = true;
+            if (catalog.isFind) {
+                catalog.findNodes = catalog.nodes;
+                catalog.nodes = catalog.oldNodes;
+            }
+            catalog.isParentFormShow = true;
         };
 
-        catalog.wireNode = function (node) {
+        catalog.setParent = function (node) {
             if (typeof node === 'undefined') {
                 catalog.newNode.parentId = 0;
                 catalog.newParent = catalog;
             } else {
                 catalog.newNode.parentId = node.id;
+                console.log(node);
                 catalog.newParent = node;
             }
-            catalog.isWireFormShow = false;
+            if (catalog.isFind) {
+                catalog.nodes = catalog.findNodes;
+            }
+            catalog.isParentFormShow = false;
+        };
+
+        catalog.cancelParent = function () {
+            if (catalog.isFind) {
+                catalog.nodes = catalog.findNodes;
+            }
+            catalog.isParentFormShow = false;
         };
 
         catalog.editNode = function (node) {
@@ -128,8 +144,9 @@
                         var oldParent = catalog.getParent(catalog, catalog.activeNode.parentId);
                         var index = oldParent.nodes.indexOf(catalog.activeNode);
                         oldParent.nodes.splice(index, 1);
-                        var newParent = catalog.newParent;
-                        newParent.nodes.push(node);
+                        if (catalog.newParent.isExpanded) {
+                            catalog.newParent.nodes.push(node);
+                        }
                         catalog.activeNode.parentId = node.parentId;
                     } else {
                         catalog.activeNode.name = node.name;
