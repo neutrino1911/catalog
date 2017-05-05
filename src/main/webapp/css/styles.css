@@ -63,7 +63,7 @@ div.field-wrapper {
 }
 
 div.field-wrapper > input[type='text'].ng-invalid-required {
-    background-color: red !important;
+    background-color: pink !important;
 }
 
 div.field-remove {
@@ -125,6 +125,14 @@ div.tree i.expand.empty {
 
 div.tree i.add {
     background-image: url('../img/add-16.png');
+}
+
+div.tree i.sort-asc {
+    background-image: url('../img/sort-asc-16.png');
+}
+
+div.tree i.sort-desc {
+    background-image: url('../img/sort-desc-16.png');
 }
 
 div.tree i.remove {

@@ -17,7 +17,8 @@
 </div>
 <div class="tree tree-wrapper" ng-hide="nodeCtrl.isParentFormShow">
     <p></p>
-    <i ng-class="{'add': true}" ng-click="nodeCtrl.addNode(nodeCtrl)"></i>
+    <i class="add" ng-click="nodeCtrl.addNode(nodeCtrl)"></i>
+    <i ng-class="{'sort-asc': !nodeCtrl.sortDESC, 'sort-desc': nodeCtrl.sortDESC}" ng-click="nodeCtrl.setSort(nodeCtrl);"></i>
     <ul node-tree></ul>
 </div>
 <div class="form-wrapper" ng-show="nodeCtrl.isFormShow">
@@ -28,8 +29,8 @@
                 <input id="input-name-field" ng-model="nodeCtrl.newNode.name" type="text" required/>
             </div>
             <div class="field-wrapper" ng-repeat="nodeField in nodeCtrl.newNode.fields">
-                <input ng-model="nodeField.name" type="text" required/>
-                <textarea ng-model="nodeField.value"></textarea>
+                <input ng-model="nodeField.name" type="text" placeholder="Имя поля" required/>
+                <textarea ng-model="nodeField.value" placeholder="Значение поля"></textarea>
                 <div class="field-remove" ng-click="nodeCtrl.removeField(nodeField)"></div>
             </div>
             <input ng-click="nodeCtrl.cancel()" type="button" value="Отмена"/>

@@ -10,6 +10,7 @@ public class Node {
     private long id;
     private long parentId;
     private String name;
+    private long childrenCount;
     private List<Field> fields;
 
     public Node() {}
@@ -40,6 +41,14 @@ public class Node {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public long getChildrenCount() {
+        return childrenCount;
+    }
+
+    public void setChildrenCount(long childrenCount) {
+        this.childrenCount = childrenCount;
     }
 
     public List<Field> getFields() {

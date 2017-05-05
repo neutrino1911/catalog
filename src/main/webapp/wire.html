@@ -1,6 +1,8 @@
 <li ng-repeat="node in node.nodes" ng-hide="node.id === nodeCtrl.newNode.id">
-    <i ng-class="{'expand': true, 'expanded': node.isExpanded, 'empty': node.isEmpty}"
+    <i ng-class="{'expand': true, 'expanded': node.isExpanded, 'empty': node.childrenCount === 0}"
        ng-click="nodeCtrl.expand(node)"></i>
     <div ng-click="nodeCtrl.setParent(node)">{{node.name|limitTo:16}}</div>
+    <i ng-class="{'sort-asc': !node.sortDESC, 'sort-desc': node.sortDESC}"
+       ng-click="nodeCtrl.setSort(node);" ng-show="node.isExpanded && node.childrenCount > 0"></i>
     <ul ng-show="node.isExpanded && node.nodes" wire-tree></ul>
 </li>

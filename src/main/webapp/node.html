@@ -1,9 +1,11 @@
 <li ng-repeat="node in node.nodes">
     <p></p>
-    <i ng-class="{'expand': true, 'expanded': node.isExpanded, 'empty': node.isEmpty}"
+    <i ng-class="{'expand': true, 'expanded': node.isExpanded, 'empty': node.childrenCount === 0}"
        ng-click="nodeCtrl.expand(node)"></i>
     <div ng-click="nodeCtrl.editNode(node)">{{node.name|limitTo:16}}</div>
     <i ng-class="{'add': true}" ng-click="nodeCtrl.addNode(node)"></i>
     <i ng-class="{'remove': true}" ng-click="nodeCtrl.removeNode(node)"></i>
+    <i ng-class="{'sort-asc': !node.sortDESC, 'sort-desc': node.sortDESC}"
+       ng-click="nodeCtrl.setSort(node);" ng-show="node.isExpanded && node.childrenCount > 0"></i>
     <ul ng-show="node.isExpanded && node.nodes" node-tree></ul>
 </li>

@@ -57,7 +57,11 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public List<Node> find(String text, long page) {
-        String findQuery = "SELECT `id`, `parent_id`, `name` FROM `node` WHERE `name` LIKE ? LIMIT ?, 25";
+        String findQuery = "SELECT `a`.`id`, `a`.`parent_id`, `a`.`name`, COUNT(`b`.`parent_id`) AS `children_count` " +
+                "FROM `node` `a` " +
+                "LEFT OUTER JOIN `node` `b` ON `a`.`id` = `b`.`parent_id` " +
+                "WHERE `a`.`name` LIKE ? " +
+                "GROUP BY `a`.`id` ORDER BY `name` ASC LIMIT ?, 25";
         List<Node> nodes = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(findQuery)) {
@@ -69,6 +73,7 @@ public class CatalogServiceImpl implements CatalogService {
                 node.setId(resultSet.getLong("id"));
                 node.setParentId(resultSet.getLong("parent_id"));
                 node.setName(resultSet.getString("name"));
+                node.setChildrenCount(resultSet.getLong("children_count"));
                 nodes.add(node);
             }
         } catch (SQLException e) {
@@ -103,6 +108,7 @@ public class CatalogServiceImpl implements CatalogService {
             }
             node.setFields(list);
         } catch (SQLException e) {
+            e.printStackTrace();
             return null;
         }
         return node;
@@ -112,9 +118,17 @@ public class CatalogServiceImpl implements CatalogService {
     public List<Node> getTree(long parentId, long page) {
         String query;
         if (parentId == 0) {
-            query = "SELECT `id`, `name` FROM `node` WHERE `parent_id` IS NULL LIMIT ?, 25";
+            query = "SELECT `a`.`id`, `a`.`name`, COUNT(`b`.`parent_id`) AS `children_count` " +
+                    "FROM `node` `a` " +
+                    "LEFT OUTER JOIN `node` `b` ON `a`.`id` = `b`.`parent_id` " +
+                    "WHERE `a`.`parent_id` IS NULL " +
+                    "GROUP BY `a`.`id` ORDER BY `name` ASC LIMIT ?, 25";
         } else {
-            query = "SELECT `id`, `name` FROM `node` WHERE `parent_id` = ? LIMIT ?, 25";
+            query = "SELECT `a`.`id`, `a`.`name`, COUNT(`b`.`parent_id`) AS `children_count` " +
+                    "FROM `node` `a` " +
+                    "LEFT OUTER JOIN `node` `b` ON `a`.`id` = `b`.`parent_id` " +
+                    "WHERE `a`.`parent_id` = ? " +
+                    "GROUP BY `a`.`id` ORDER BY `name` ASC LIMIT ?, 25";
         }
         List<Node> list = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
@@ -132,6 +146,7 @@ public class CatalogServiceImpl implements CatalogService {
                 node.setId(resultSet.getLong("id"));
                 node.setParentId(parentId);
                 node.setName(resultSet.getString("name"));
+                node.setChildrenCount(resultSet.getLong("children_count"));
                 node.setFields(new ArrayList<Field>());
                 list.add(node);
             }

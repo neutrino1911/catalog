@@ -28,6 +28,10 @@
         catalog.isFindEnd = false;
 
         catalog.loading = false;
+        
+        catalog.sortDESC = false;
+        catalog.sortedNodes = [];
+        window.catalog = catalog;
 
         catalog.loadNodes = function () {
             $http.get('api/gettree/0?page=' + catalog.treePage).then(function (response) {
@@ -40,21 +44,22 @@
                     catalog.treePage++;
                     catalog.loadNodes();
                 }
+                catalog.sortNodes(catalog);
                 catalog.loading = false;
             });
         };
 
         catalog.expand = function (node) {
-            if (node.isEmpty) return;
+            if (node.childrenCount === 0) return;
             node.isExpanded = !node.isExpanded;
             node.nodes = [];
             if (node.isExpanded) {
                 $http.get('api/gettree/' + node.id).then(function (response) {
                     console.log(response.data);
                     node.nodes = response.data.result;
-                    if (node.nodes.length === 0) {
+                    /*if (node.nodes.length === 0) {
                         node.isEmpty = true;
-                    }
+                    }*/
                 });
             }
         };
@@ -169,10 +174,10 @@
                     var parent = catalog.getParent(catalog, catalog.newNode.parentId);
                     //console.log(parent);
                     if (parent.isExpanded) {
-                        response.data.result.isEmpty = true;
+                        //response.data.result.isEmpty = true;
                         parent.nodes.push(response.data.result);
                     }
-                    parent.isEmpty = false;
+                    //parent.isEmpty = false;
                     catalog.newNode = {};
                     var classList = document.getElementById('input-name-field').classList;
                     classList.remove('ng-dirty');
@@ -223,6 +228,7 @@
             catalog.isFormShow = true;
             catalog.newNode.parentId = parentNode.id;
             catalog.newNode.fields = [];
+            catalog.newNode.childrenCount = 0;
         };
 
         catalog.removeNode = function (node) {
@@ -279,6 +285,31 @@
         window.onscroll = function(ev) {
             if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
                 catalog.loadMore();
+            }
+        };
+
+        catalog.setSort = function (node) {
+            node.sortDESC = !node.sortDESC;
+            catalog.sortNodes(node);
+        };
+        
+        catalog.compareDESC = function (a, b) {
+            if (a.name.toLowerCase() < b.name.toLowerCase()) return 1;
+            if (a.name.toLowerCase() > b.name.toLowerCase()) return -1;
+            return 0;
+        };
+
+        catalog.compareASC = function (a, b) {
+            if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+            if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+            return 0;
+        };
+
+        catalog.sortNodes = function (node) {
+            if (node.sortDESC) {
+                node.nodes.sort(catalog.compareDESC);
+            } else {
+                node.nodes.sort(catalog.compareASC);
             }
         };
 
