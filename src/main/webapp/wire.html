@@ -1,4 +1,5 @@
 <li ng-repeat="node in node.nodes" ng-hide="node.id === nodeCtrl.newNode.id">
+    <p></p>
     <i ng-class="{'expand': true, 'expanded': node.isExpanded, 'empty': node.childrenCount === 0}"
        ng-click="nodeCtrl.expand(node)"></i>
     <div ng-click="nodeCtrl.setParent(node)">{{node.name|limitTo:16}}</div>
