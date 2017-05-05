@@ -8,41 +8,41 @@
     <script type="text/javascript" src="js/app.js"></script>
 </head>
 <body ng-controller="nodeController as nodeCtrl">
-<div class="find-wrapper">
-    <input id="find-input" type="text" ng-model="nodeCtrl.findQuery">
-    <i ng-class="{'remove': true}" ng-click="nodeCtrl.clearFind()"></i>
-    <input type="button" value="Поиск" ng-click="nodeCtrl.find()">
+<div class="find-wrapper" ng-hide="nodeCtrl.isParentFormShow">
+    <form ng-submit="nodeCtrl.find()">
+        <input id="find-input" type="text" ng-model="nodeCtrl.findQuery" ng-change="nodeCtrl.findChange()">
+        <i ng-class="{'remove': true}" ng-click="nodeCtrl.clearFind()"></i>
+        <input type="submit" value="Поиск">
+    </form>
 </div>
-<div class="tree tree-wrapper">
+<div class="tree tree-wrapper" ng-hide="nodeCtrl.isParentFormShow">
     <p></p>
     <i ng-class="{'add': true}" ng-click="nodeCtrl.addNode(nodeCtrl)"></i>
     <ul node-tree></ul>
 </div>
 <div class="form-wrapper" ng-show="nodeCtrl.isFormShow">
     <div class="form">
-        <form class="node-form" name="nodeForm">
+        <form class="node-form" ng-submit="nodeCtrl.saveNode()" name="nodeForm">
             <div class="field-wrapper">
                 <label>Name:</label>
-                <input id="input-name-field" ng-model="nodeCtrl.newNode.name" type="text"/>
+                <input id="input-name-field" ng-model="nodeCtrl.newNode.name" type="text" required/>
             </div>
             <div class="field-wrapper" ng-repeat="nodeField in nodeCtrl.newNode.fields">
-                <input ng-model="nodeField.name" type="text"/>
+                <input ng-model="nodeField.name" type="text" required/>
                 <textarea ng-model="nodeField.value"></textarea>
                 <div class="field-remove" ng-click="nodeCtrl.removeField(nodeField)"></div>
             </div>
             <input ng-click="nodeCtrl.cancel()" type="button" value="Отмена"/>
-            <input ng-click="nodeCtrl.saveNode()" type="button" value="Сохранить"/>
+            <input type="submit" value="Сохранить"/>
             <input ng-click="nodeCtrl.addField()" type="button" value="Добавить поле"/>
             <input ng-click="nodeCtrl.selectNewParent()" type="button" value="Сменить родителя"/>
         </form>
     </div>
 </div>
 <div class="tree tree-select-wrapper" ng-show="nodeCtrl.isParentFormShow">
-    <div class="form">
-        <p ng-click="nodeCtrl.wireNode()">Корень</p>
-        <ul wire-tree></ul>
-        <input ng-click="nodeCtrl.cancelParent()" type="button" value="Отмена"/>
-    </div>
+    <input ng-click="nodeCtrl.setParent()" type="button" value="Корень"/>
+    <input ng-click="nodeCtrl.cancelParent()" type="button" value="Отмена"/>
+    <ul wire-tree></ul>
 </div>
 </body>
 </html>

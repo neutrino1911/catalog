@@ -36,11 +36,13 @@ public class MainRest {
     }
 
     @GET @Path(value = "/gettree/{parentId : \\d+}")
-    public Response getTree(@PathParam("parentId") long parentId) {
-        if (parentId < 0) {
+    public Response getTree(
+            @PathParam("parentId") long parentId,
+            @QueryParam("page") long page) {
+        if (parentId < 0 || page < 0) {
             return getError(400);
         }
-        List<Node> list = catalogService.getTree(parentId);
+        List<Node> list = catalogService.getTree(parentId, page);
         if (list == null) {
             return getError(500);
         }
@@ -48,11 +50,13 @@ public class MainRest {
     }
 
     @GET @Path(value = "/find")
-    public Response find(@QueryParam("q") String text) {
-        if (text == null || text.isEmpty()) {
+    public Response find(
+            @QueryParam("q") String text,
+            @QueryParam("page") long page) {
+        if (text.isEmpty() || page < 0) {
             return getError(400);
         }
-        List<Node> nodes = catalogService.find(text);
+        List<Node> nodes = catalogService.find(text, page);
         if (nodes == null) {
             return getError(404);
         }
@@ -115,6 +119,12 @@ public class MainRest {
         } else {
             return getError(404);
         }
+    }
+
+    @POST @Path(value = "/mock/{count : \\d+}")
+    public Response mockData(@PathParam("count") long count) {
+        catalogService.mock(count);
+        return getSuccess(true);
     }
 
     private String getJSON(Object o) {

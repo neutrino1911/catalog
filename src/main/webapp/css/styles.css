@@ -1,20 +1,25 @@
 div.find-wrapper {
-    position: relative;
-    height: 21px;
-    margin-left: calc(50% - 130px);
-    margin-top: 40px;
-    z-index: 1;
+    position: fixed;
+    box-sizing: border-box;
+    height: 60px;
+    top: 0;
+    left: 0;
+    margin-left: 60px;
+    padding-top: 20px;
+    width: 100%;
+    z-index: 10;
+    background-color: white;
 }
 
-div.find-wrapper > input[type='text'] {
+div.find-wrapper input[type='text'] {
     width: 160px;
 }
 
-div.find-wrapper > input[type='button'] {
+div.find-wrapper input[type='submit'] {
     margin-left: 20px;
 }
 
-div.find-wrapper > i {
+div.find-wrapper i {
     width: 21px;
     height: 21px;
     position: absolute;
@@ -24,8 +29,10 @@ div.find-wrapper > i {
 
 div.tree-wrapper {
     position: relative;
-    margin: 0 calc(50% - 150px);
+    margin-left: 40px;
+    margin-top: 30px;
     min-height: 20px;
+    padding-bottom: 100px;
 }
 
 div.form-wrapper {
@@ -39,18 +46,24 @@ div.form-wrapper {
 
 div.form {
     box-sizing: border-box;
-    padding: 38px;
+    padding: 38px 0 38px 38px;
     background-color: white;
     width: 800px;
     height: 600px;
     border-radius: 10px;
     border: 2px solid black;
+    margin-top: 20px;
+    overflow: auto;
 }
 
 div.field-wrapper {
     float: left;
     margin-bottom: 10px;
     min-height: 21px;
+}
+
+div.field-wrapper > input[type='text'].ng-invalid-required {
+    background-color: red !important;
 }
 
 div.field-remove {
@@ -132,7 +145,7 @@ input {
 }
 
 form.node-form input[type='text'].ng-dirty {
-    background-color: lightgreen;
+    /*background-color: lightgreen;*/
 }
 
 textarea {
@@ -144,7 +157,7 @@ textarea {
 }
 
 form.node-form textarea.ng-dirty {
-    background-color: lightgreen;
+    /*background-color: lightgreen;*/
 }
 
 input[type='text'] {
@@ -156,24 +169,31 @@ form.node-form > input[type='button'] {
     margin-right: 20px;
 }
 
+form.node-form > input[type='submit'] {
+    float: right;
+    margin-right: 20px;
+}
+
 div.tree-select-wrapper {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 40px calc(50% - 400px);
-    z-index: 3;
+    position: relative;
+    margin-left: 40px;
+    min-height: 20px;
+    padding-top: 40px;
 }
 
-div.tree-select-wrapper .form > p {
-    cursor: pointer;
+div.tree-select-wrapper > input[type='button'] {
+    margin-left: 20px;
 }
 
-div.tree-select-wrapper .form > p:hover {
-    background-color: lightgreen;
+div.tree-select-wrapper > input[type='button']:nth-child(2) {
+    float: none;
 }
 
-div.tree-select-wrapper .form div {
+div.tree-select-wrapper > ul {
+    margin-top: 30px;
+}
+
+div.tree-select-wrapper div {
     float: none;
     margin-bottom: 8px;
     margin-right: 8px;

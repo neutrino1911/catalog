@@ -18,6 +18,7 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public Node add(Node node) {
+        if (!checkNode(node)) return null;
         String AIQuery = "SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES" +
                 " WHERE TABLE_SCHEMA = 'catalog' AND TABLE_NAME = 'node'";
         String nodeQuery = "INSERT INTO `node`(`parent_id`, `name`) VALUES (?, ?)";
@@ -55,13 +56,14 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public List<Node> find(String text) {
-        String findQuery = "SELECT `id`, `parent_id`, `name` FROM `node` WHERE `name` LIKE ?";
+    public List<Node> find(String text, long page) {
+        String findQuery = "SELECT `id`, `parent_id`, `name` FROM `node` WHERE `name` LIKE ? LIMIT ?, 25";
         List<Node> nodes = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement nodeStatement = connection.prepareStatement(findQuery)) {
-            nodeStatement.setString(1, "%" + text + "%");
-            ResultSet resultSet = nodeStatement.executeQuery();
+             PreparedStatement statement = connection.prepareStatement(findQuery)) {
+            statement.setString(1, "%" + text + "%");
+            statement.setLong(2, page * 25);
+            ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Node node = new Node();
                 node.setId(resultSet.getLong("id"));
@@ -107,18 +109,21 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public List<Node> getTree(long parentId) {
+    public List<Node> getTree(long parentId, long page) {
         String query;
         if (parentId == 0) {
-            query = "SELECT `id`, `name` FROM `node` WHERE `parent_id` IS NULL";
+            query = "SELECT `id`, `name` FROM `node` WHERE `parent_id` IS NULL LIMIT ?, 25";
         } else {
-            query = "SELECT `id`, `name` FROM `node` WHERE `parent_id` = ?";
+            query = "SELECT `id`, `name` FROM `node` WHERE `parent_id` = ? LIMIT ?, 25";
         }
         List<Node> list = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             if (parentId > 0) {
                 statement.setLong(1, parentId);
+                statement.setLong(2, page * 25);
+            } else {
+                statement.setLong(1, page * 25);
             }
             ResultSet resultSet = statement.executeQuery();
             Node node;
@@ -155,6 +160,7 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public Node update(Node node) {
+        if (!checkNode(node)) return null;
         String nodeQuery = "UPDATE `node` SET `parent_id` = ?, `name` = ? WHERE `id` = ?";
         String fieldUpdateQuery = "UPDATE `field` SET `name` = ?, `value` = ? WHERE `id` = ?";
         String fieldInsertQuery = "INSERT INTO `field`(`node_id`, `name`, `value`) VALUES (?, ?, ?)";
@@ -197,6 +203,42 @@ public class CatalogServiceImpl implements CatalogService {
         return node;
     }
 
+    @Override
+    public void mock(long count) {
+        //String countQuery = "SELECT COUNT(*) FROM `node`";
+        String nodeQuery = "INSERT INTO `node`(`parent_id`, `name`) VALUES (?, ?)";
+        String fieldQuery = "INSERT INTO `field`(`node_id`, `name`, `value`) VALUES (?, ?, ?)";
+        try (Connection connection = dataSource.getConnection();
+             //PreparedStatement countStatement = connection.prepareStatement(countQuery);
+             PreparedStatement nodeStatement = connection.prepareStatement(nodeQuery);
+             PreparedStatement fieldStatement = connection.prepareStatement(fieldQuery)) {
+            //ResultSet resultSet = countStatement.executeQuery();
+            //long current = resultSet.getLong(1);
+            String[] names = {"node", "address", "data", "street", "home", "car", "home", "apple", "door", "tree"};
+            int[] counts = new int[names.length];
+            long N = 121;
+            for (long i = 0; i < count; i++) {
+                long parentId = ((i % N) - 1) / 3 + i / N * N;
+                if (i % N == 0) {
+                    nodeStatement.setNull(1, Types.BIGINT);
+                } else {
+                    nodeStatement.setLong(1, parentId + 1);
+                }
+                int index = (int) (Math.random() * names.length);
+                nodeStatement.setString(2, names[index] + counts[index]++);
+                nodeStatement.executeUpdate();
+                int fieldsCount = (int) (Math.random() * 4);
+                for (long j = 0; j <= fieldsCount; j++) {
+                    fieldStatement.setLong(1, i + 1);
+                    fieldStatement.setString(2, "filed" + j);
+                    fieldStatement.setString(3, "value" + j);
+                    fieldStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ignored) {
+        }
+    }
+
     private boolean removeById(String query, long id) {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -209,5 +251,18 @@ public class CatalogServiceImpl implements CatalogService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private boolean checkNode(Node node) {
+        if (node.getName().isEmpty()) {
+            return false;
+        }
+        List<Field> fields = node.getFields();
+        for (int i = 0; i < node.getFields().size(); i++) {
+            if (fields.get(i).getName().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

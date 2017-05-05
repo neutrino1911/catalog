@@ -12,30 +12,55 @@
 
         catalog.isExpanded = true;
         catalog.isAdding = false;
+        catalog.isFormShow = false;
 
         catalog.isFind = false;
         catalog.findNodes = [];
         catalog.findQuery = '';
+        catalog.findTimer = {};
 
         catalog.isParentFormShow = false;
         catalog.newParent = {};
 
-        $http.get('api/gettree/0').then(function (response) {
-            catalog.nodes = response.data.result;
-        });
+        catalog.treePage = 0;
+        catalog.isTreeEnd = false;
+        catalog.findPage = 0;
+        catalog.isFindEnd = false;
+
+        catalog.loading = false;
+
+        catalog.loadNodes = function () {
+            $http.get('api/gettree/0?page=' + catalog.treePage).then(function (response) {
+                console.log(response.data);
+                if (response.data.result.length < 25) {
+                    catalog.isTreeEnd = true;
+                }
+                catalog.nodes = catalog.nodes.concat(response.data.result);
+                if (!catalog.isTreeEnd && window.innerHeight >= document.body.offsetHeight) {
+                    catalog.treePage++;
+                    catalog.loadNodes();
+                }
+                catalog.loading = false;
+            });
+        };
 
         catalog.expand = function (node) {
+            if (node.isEmpty) return;
             node.isExpanded = !node.isExpanded;
             node.nodes = [];
             if (node.isExpanded) {
                 $http.get('api/gettree/' + node.id).then(function (response) {
-                    //console.log(response.data.result);
+                    console.log(response.data);
                     node.nodes = response.data.result;
+                    if (node.nodes.length === 0) {
+                        node.isEmpty = true;
+                    }
                 });
             }
         };
 
         catalog.selectNewParent = function () {
+            catalog.isFormShow = false;
             if (catalog.isFind) {
                 catalog.findNodes = catalog.nodes;
                 catalog.nodes = catalog.oldNodes;
@@ -55,6 +80,7 @@
             if (catalog.isFind) {
                 catalog.nodes = catalog.findNodes;
             }
+            catalog.isFormShow = true;
             catalog.isParentFormShow = false;
         };
 
@@ -62,6 +88,7 @@
             if (catalog.isFind) {
                 catalog.nodes = catalog.findNodes;
             }
+            catalog.isFormShow = true;
             catalog.isParentFormShow = false;
         };
 
@@ -76,22 +103,49 @@
         };
 
         catalog.find = function () {
+            if (catalog.findQuery === '') return;
             catalog.isFind = true;
-            $http.get('api/find?q=' + catalog.findQuery).then(function (response) {
-                if (catalog.oldNodes.length === 0) {
-                    catalog.oldNodes = catalog.nodes;
+            catalog.isFindEnd = false;
+            catalog.findPage = 0;
+            if (catalog.oldNodes.length === 0) {
+                catalog.oldNodes = catalog.nodes;
+            }
+            catalog.nodes = [];
+            catalog.loadFindNodes();
+        };
+
+        catalog.loadFindNodes = function () {
+            $http.get('api/find?q=' + catalog.findQuery + '&page=' + catalog.findPage).then(function (response) {
+                console.log(response.data);
+                if (response.data.result.length < 25) {
+                    catalog.isFindEnd = true;
                 }
-                catalog.nodes = response.data.result;
+                catalog.nodes = catalog.nodes.concat(response.data.result);
+                if (!catalog.isFindEnd && window.innerHeight >= document.body.offsetHeight) {
+                    catalog.findPage++;
+                    catalog.loadFindNodes();
+                }
+                catalog.loading = false;
             });
         };
 
         catalog.clearFind = function () {
-            catalog.isFind = false;
+            catalog.loading = true;
+            catalog.findPage = 0;
             catalog.findQuery = '';
             if (catalog.oldNodes.length !== 0) {
+                catalog.nodes = [];
                 catalog.nodes = catalog.oldNodes;
                 catalog.oldNodes = [];
             }
+            catalog.isFind = false;
+            catalog.isFindEnd = false;
+            catalog.loading = false;
+        };
+
+        catalog.findChange = function () {
+            clearTimeout(catalog.findTimer);
+            catalog.findTimer = setTimeout(catalog.find, 500);
         };
 
         catalog.cancel = function () {
@@ -108,14 +162,18 @@
         catalog.saveNode = function () {
             if (catalog.isAdding) {
                 if (!confirm('Сохранить ' + catalog.newNode.name + '?')) return;
+                //console.log(catalog.newNode);
                 catalog.isFormShow = false;
                 $http.put('api/add', catalog.newNode).then(function (response) {
+                    //console.log(response.data.result);
                     var parent = catalog.getParent(catalog, catalog.newNode.parentId);
+                    //console.log(parent);
                     if (parent.isExpanded) {
+                        response.data.result.isEmpty = true;
                         parent.nodes.push(response.data.result);
                     }
+                    parent.isEmpty = false;
                     catalog.newNode = {};
-                    //console.log(response.data.result);
                     var classList = document.getElementById('input-name-field').classList;
                     classList.remove('ng-dirty');
                     classList.add('ng-pristine');
@@ -136,7 +194,6 @@
                         $http.delete('api/removefield/' + fields[i].id);
                     }
                 }
-                //console.log(JSON.stringify(catalog.newNode));
                 $http.put('api/update', catalog.newNode).then(function (response) {
                     var node = response.data.result;
                     //console.log(node);
@@ -193,7 +250,6 @@
         };
 
         catalog.getParent = function (parent, parentId) {
-            if (catalog.isFind) return catalog;
             if (parentId === 0) return catalog;
             if (parent.id === parentId) return parent;
             if (typeof parent.nodes === 'undefined') return false;
@@ -205,6 +261,28 @@
             }
             return false;
         };
+
+        catalog.loadMore = function () {
+            if (catalog.loading) return;
+            if (catalog.isFind && catalog.isFindEnd) return;
+            if (!catalog.isFind && catalog.isTreeEnd) return;
+            catalog.loading = true;
+            if (catalog.isFind) {
+                catalog.findPage++;
+                catalog.loadFindNodes();
+            } else {
+                catalog.treePage++;
+                catalog.loadNodes();
+            }
+        };
+
+        window.onscroll = function(ev) {
+            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+                catalog.loadMore();
+            }
+        };
+
+        catalog.loadNodes();
     }]);
 
     app.directive('nodeTree', function () {
