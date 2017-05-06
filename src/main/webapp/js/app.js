@@ -5,6 +5,7 @@
         var catalog = this;
         $scope.node = catalog;
 
+        catalog.addedNodes = [];
         catalog.activeNode = {};
         catalog.newNode = {};
         catalog.oldNodes = [];
@@ -31,7 +32,9 @@
         
         catalog.sortDESC = false;
         catalog.sortedNodes = [];
-        window.catalog = catalog;
+        //window.catalog = catalog;
+
+        catalog.treeLoadTimer = {};
 
         catalog.loadNodes = function () {
             $http.get('api/gettree/0?page=' + catalog.treePage).then(function (response) {
@@ -39,10 +42,24 @@
                 if (response.data.result.length < 25) {
                     catalog.isTreeEnd = true;
                 }
+                for (var i = 0; i < response.data.result.length; i++) {
+                    for (var j = 0; j < catalog.addedNodes.length; j++) {
+                        if (response.data.result[i].id === catalog.addedNodes[j].id) {
+                            var index = catalog.nodes.indexOf(catalog.addedNodes[j]);
+                            catalog.nodes.splice(index, 1);
+                            catalog.addedNodes.splice(j, 1);
+                        }
+                    }
+                }
                 catalog.nodes = catalog.nodes.concat(response.data.result);
                 if (!catalog.isTreeEnd && window.innerHeight >= document.body.offsetHeight) {
-                    catalog.treePage++;
-                    catalog.loadNodes();
+                    clearTimeout(catalog.treeLoadTimer);
+                    catalog.treeLoadTimer = setTimeout(function () {
+                        if (!catalog.isTreeEnd && window.innerHeight >= document.body.offsetHeight) {
+                            catalog.treePage++;
+                            catalog.loadNodes();
+                        }
+                    }, 500);
                 }
                 catalog.sortNodes(catalog);
                 catalog.loading = false;
@@ -172,12 +189,12 @@
                 $http.put('api/add', catalog.newNode).then(function (response) {
                     //console.log(response.data.result);
                     var parent = catalog.getParent(catalog, catalog.newNode.parentId);
-                    //console.log(parent);
                     if (parent.isExpanded) {
-                        //response.data.result.isEmpty = true;
                         parent.nodes.push(response.data.result);
                     }
-                    //parent.isEmpty = false;
+                    if (parent === catalog) {
+                        catalog.addedNodes.push(response.data.result);
+                    }
                     catalog.newNode = {};
                     var classList = document.getElementById('input-name-field').classList;
                     classList.remove('ng-dirty');
