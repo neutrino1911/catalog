@@ -57,6 +57,8 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public List<Node> findNodes(String text, long page) {
+        text = text.replaceAll("%", "\\\\%");
+        text = text.replaceAll("_", "\\\\_");
         String findQuery = "SELECT `a`.`id`, `a`.`parent_id`, `a`.`name`, COUNT(`b`.`parent_id`) AS `children_count` " +
                 "FROM `node` `a` " +
                 "LEFT OUTER JOIN `node` `b` ON `a`.`id` = `b`.`parent_id` " +

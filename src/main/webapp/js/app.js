@@ -137,7 +137,8 @@
         };
 
         catalog.loadFindNodes = function () {
-            $http.get('api/node/find/page/' + catalog.findPage + '?query=' + catalog.findQuery).then(function (response) {
+            console.log(encodeURIComponent(catalog.findQuery));
+            $http.get('api/node/find/' + encodeURIComponent(catalog.findQuery) + '/page/' + catalog.findPage).then(function (response) {
                 console.log(response.data);
                 if (response.data.result.length < 25) {
                     catalog.isFindEnd = true;

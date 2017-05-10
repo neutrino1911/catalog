@@ -37,14 +37,14 @@ public class MainRest {
         return getSuccess(list);
     }
 
-    @GET @Path(value = "/node/find/page/{page : \\d+}")
-    public Response find(
-            @QueryParam("query") String text,
+    @GET @Path(value = "/node/find/{query}/page/{page : \\d+}")
+    public Response findNodes(
+            @PathParam("query") String query,
             @PathParam("page") long page) {
-        if (text.isEmpty() || page < 0) {
+        if (query.isEmpty() || page < 0) {
             return getError(400);
         }
-        List<Node> nodes = catalogService.findNodes(text, page);
+        List<Node> nodes = catalogService.findNodes(query, page);
         if (nodes == null) {
             return getError(404);
         }
