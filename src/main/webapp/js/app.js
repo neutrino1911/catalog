@@ -100,7 +100,7 @@
             if (node === catalog) return;
             node.nodes = [];
             if (node.isExpanded) {
-                $http.get('api/nodes/' + node.id + '/page/0').then(function (response) {
+                $http.get('api/nodes/' + node.id + '/page/0/sort/asc').then(function (response) {
                     console.log(response.data);
                     node.nodes = response.data.result;
                     /*if (node.nodes.length === 0) {
