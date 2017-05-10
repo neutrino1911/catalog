@@ -97,7 +97,7 @@ li > div:hover {
     background-color: lightgreen;
 }
 
-div.tree > i {
+div.tree > i:first-of-type {
     margin-left: 20px;
 }
 

@@ -24,59 +24,88 @@
         catalog.newParent = {};
 
         catalog.treePage = 0;
+        catalog.treePageASC = 0;
+        catalog.treePageDESC = 0;
         catalog.isTreeEnd = false;
         catalog.findPage = 0;
         catalog.isFindEnd = false;
 
         catalog.loading = false;
-        
+
         catalog.sortDESC = false;
         catalog.sortedNodes = [];
+        //catalog.isFirstFlip = true;
+
         //window.catalog = catalog;
+
+        catalog.isFirstLoad = true;
+        catalog.nodesCount = 0;
+        catalog.bodyHeight = 0;
 
         catalog.treeLoadTimer = {};
 
         catalog.loadNodes = function () {
-            $http.get('api/nodes/0/page/' + catalog.treePage).then(function (response) {
-                console.log(response.data);
-                if (response.data.result.length < 25) {
-                    catalog.isTreeEnd = true;
-                }
-                for (var i = 0; i < response.data.result.length; i++) {
-                    for (var j = 0; j < catalog.addedNodes.length; j++) {
-                        if (response.data.result[i].id === catalog.addedNodes[j].id) {
-                            var index = catalog.nodes.indexOf(catalog.addedNodes[j]);
-                            catalog.nodes.splice(index, 1);
-                            catalog.addedNodes.splice(j, 1);
+            if (catalog.isFirstLoad) {
+                catalog.isFirstLoad = false;
+                $http.get('api/nodes/count').then(function (response) {
+                    catalog.nodesCount = response.data.result;
+                    catalog.bodyHeight = 32 + catalog.nodesCount * 32;
+                    if (catalog.nodesCount > 0) {
+                        var trees = document.getElementsByClassName("tree");
+                        for (var i = 0; i < trees.length; i++) {
+                            trees[i].style.height = catalog.bodyHeight + 'px';
                         }
                     }
-                }
-                catalog.nodes = catalog.nodes.concat(response.data.result);
-                if (!catalog.isTreeEnd && window.innerHeight >= document.body.offsetHeight) {
-                    clearTimeout(catalog.treeLoadTimer);
-                    catalog.treeLoadTimer = setTimeout(function () {
-                        if (!catalog.isTreeEnd && window.innerHeight >= document.body.offsetHeight) {
-                            catalog.treePage++;
-                            catalog.loadNodes();
+                });
+            }
+            $http.get('api/nodes/0/page/' + catalog.treePage + '/sort/' + (catalog.sortDESC ? 'desc' : 'asc'))
+                .then(function (response) {
+                    console.log(response.data);
+                    if (catalog.nodes.length === 0) window.scrollTo(0, 0);
+                    if (response.data.result.length < 25) {
+                        catalog.isTreeEnd = true;
+                    }
+                    //Удаляем добавленные юзером ноды, присутствующие в ответе
+                    for (var i = 0; i < response.data.result.length; i++) {
+                        for (var j = 0; j < catalog.addedNodes.length; j++) {
+                            if (response.data.result[i].id === catalog.addedNodes[j].id) {
+                                var index = catalog.nodes.indexOf(catalog.addedNodes[j]);
+                                catalog.nodes.splice(index, 1);
+                                catalog.addedNodes.splice(j, 1);
+                            }
                         }
-                    }, 500);
-                }
-                catalog.sortNodes(catalog);
-                catalog.loading = false;
-            });
+                    }
+                    catalog.nodes = catalog.nodes.concat(response.data.result);
+                    if (catalog.sortDESC) {
+                        window.scrollBy(0, -32 * 25);
+                    }
+                    //Загружаем еще ноды, если страница не заполнена
+                    if (catalog.isExpanded && !catalog.isTreeEnd && window.innerHeight >= catalog.nodes.length * 32) {
+                        clearTimeout(catalog.treeLoadTimer);
+                        catalog.treeLoadTimer = setTimeout(function () {
+                            if (catalog.isExpanded && !catalog.isTreeEnd && window.innerHeight >= catalog.nodes.length * 32) {
+                                catalog.treePage++;
+                                catalog.loadNodes();
+                            }
+                        }, 500);
+                    }
+                    catalog.sortNodes(catalog);
+                    catalog.loading = false;
+                });
         };
 
         catalog.expand = function (node) {
             if (node.childrenCount === 0) return;
             node.isExpanded = !node.isExpanded;
+            if (node === catalog) return;
             node.nodes = [];
             if (node.isExpanded) {
                 $http.get('api/nodes/' + node.id + '/page/0').then(function (response) {
                     console.log(response.data);
                     node.nodes = response.data.result;
                     /*if (node.nodes.length === 0) {
-                        node.isEmpty = true;
-                    }*/
+                     node.isEmpty = true;
+                     }*/
                 });
             }
         };
@@ -211,7 +240,7 @@
                 var newFields = catalog.newNode.fields;
                 for (var i = 0; i < fields.length; i++) {
                     var founded = false;
-                    for(var j = 0; j < newFields.length; j++) {
+                    for (var j = 0; j < newFields.length; j++) {
                         if (fields[i].id === newFields[j].id) {
                             founded = true;
                         }
@@ -298,22 +327,40 @@
                 catalog.findPage++;
                 catalog.loadFindNodes();
             } else {
+                //console.log((catalog.sortDESC ? 'desc ' : 'asc ') + catalog.treePage);
                 catalog.treePage++;
                 catalog.loadNodes();
             }
         };
 
-        window.onscroll = function(ev) {
-            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+        window.onscroll = function (ev) {
+            if ((window.innerHeight + window.pageYOffset) >= catalog.nodes.length * 32) {
                 catalog.loadMore();
             }
         };
 
         catalog.setSort = function (node) {
+            /*if (node === catalog) {
+                //if (catalog.treePageASC === 0) catalog.treePageASC = catalog.treePage;
+                if (catalog.sortDESC) {
+                    catalog.treePageDESC = catalog.treePage;
+                    catalog.treePage = catalog.treePageASC;
+                } else {
+                    catalog.treePageASC = catalog.treePage;
+                    catalog.treePage = catalog.treePageDESC;
+                }
+            }*/
             node.sortDESC = !node.sortDESC;
+
+            if (!catalog.isTreeEnd && node === catalog) {
+                //catalog.isFirstFlip = false;
+                catalog.nodes = [];
+                catalog.treePage = 0;
+                catalog.loadNodes();
+            }
             catalog.sortNodes(node);
         };
-        
+
         catalog.compareDESC = function (a, b) {
             if (a.name.toLowerCase() < b.name.toLowerCase()) return 1;
             if (a.name.toLowerCase() > b.name.toLowerCase()) return -1;

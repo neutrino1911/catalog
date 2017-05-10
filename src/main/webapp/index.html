@@ -17,9 +17,11 @@
 </div>
 <div class="tree tree-wrapper" ng-hide="nodeCtrl.isParentFormShow">
     <p></p>
+    <i ng-class="{'expand': true, 'expanded': nodeCtrl.isExpanded}"
+       ng-click="nodeCtrl.expand(nodeCtrl)"></i>
     <i class="add" ng-click="nodeCtrl.addNode(nodeCtrl)"></i>
     <i ng-class="{'sort-asc': !nodeCtrl.sortDESC, 'sort-desc': nodeCtrl.sortDESC}" ng-click="nodeCtrl.setSort(nodeCtrl);"></i>
-    <ul node-tree></ul>
+    <ul ng-show="nodeCtrl.isExpanded && nodeCtrl.nodes" node-tree></ul>
 </div>
 <div class="form-wrapper" ng-show="nodeCtrl.isFormShow">
     <div class="form">

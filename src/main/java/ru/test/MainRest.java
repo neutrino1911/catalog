@@ -23,14 +23,24 @@ public class MainRest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @GET @Path(value = "/nodes/{parentId : \\d+}/page/{page : \\d+}")
+    @GET @Path(value = "/nodes/count")
+    public Response getCount() {
+        long count = catalogService.getCount();
+        if (count < 0) {
+            return getError(500);
+        }
+        return getSuccess(count);
+    }
+
+    @GET @Path(value = "/nodes/{parentId : \\d+}/page/{page : \\d+}/sort/{sort : asc|desc}")
     public Response getNodes(
             @PathParam("parentId") long parentId,
-            @PathParam("page") long page) {
+            @PathParam("page") long page,
+            @PathParam("sort") String sort) {
         if (parentId < 0 || page < 0) {
             return getError(400);
         }
-        List<Node> list = catalogService.getNodes(parentId, page);
+        List<Node> list = catalogService.getNodes(parentId, page, sort);
         if (list == null) {
             return getError(500);
         }

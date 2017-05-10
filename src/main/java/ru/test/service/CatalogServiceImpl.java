@@ -85,6 +85,19 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
+    public long getCount() {
+        String query = "SELECT COUNT(*) FROM `node` WHERE `parent_id` IS NULL";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            resultSet.next();
+            return resultSet.getLong(1);
+        } catch (SQLException e) {
+            return -1;
+        }
+    }
+
+    @Override
     public Node getNode(long nodeId) {
         String nodeQuery = "SELECT `parent_id`, `name` FROM `node` WHERE `id` = ?";
         String fieldQuery = "SELECT `id`, `name`, `value` FROM `field` WHERE `node_id` = ?";
@@ -117,23 +130,19 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public List<Node> getNodes(long parentId, long page) {
-        String query;
-        if (parentId == 0) {
-            query = "SELECT `a`.`id`, `a`.`name`, COUNT(`b`.`parent_id`) AS `children_count` " +
-                    "FROM `node` `a` " +
-                    "LEFT OUTER JOIN `node` `b` ON `a`.`id` = `b`.`parent_id` " +
-                    "WHERE `a`.`parent_id` IS NULL " +
-                    "GROUP BY `a`.`id` ORDER BY `name` ASC LIMIT ?, 25";
-        } else {
-            query = "SELECT `a`.`id`, `a`.`name`, COUNT(`b`.`parent_id`) AS `children_count` " +
+    public List<Node> getNodes(long parentId, long page, String sort) {
+        String query = "SELECT `a`.`id`, `a`.`name`, COUNT(`b`.`parent_id`) AS `children_count` " +
                     "FROM `node` `a` " +
                     "LEFT OUTER JOIN `node` `b` ON `a`.`id` = `b`.`parent_id` " +
                     "WHERE `a`.`parent_id` = ? " +
                     "GROUP BY `a`.`id` ORDER BY `name` ASC LIMIT ?, 25";
-        }
-        if (parentId > 0) {
+        if (parentId == 0) {
+            query = query.replaceFirst("= \\?", "IS NULL");
+        } else {
             query = query.replaceAll(" LIMIT \\?, 25", "");
+        }
+        if (sort.equals("desc")) {
+            query = query.replaceAll("\\bASC\\b", "DESC");
         }
         List<Node> list = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
