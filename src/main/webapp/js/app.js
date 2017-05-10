@@ -37,7 +37,7 @@
         catalog.treeLoadTimer = {};
 
         catalog.loadNodes = function () {
-            $http.get('api/gettree/0?page=' + catalog.treePage).then(function (response) {
+            $http.get('api/nodes/0/page/' + catalog.treePage).then(function (response) {
                 console.log(response.data);
                 if (response.data.result.length < 25) {
                     catalog.isTreeEnd = true;
@@ -71,7 +71,7 @@
             node.isExpanded = !node.isExpanded;
             node.nodes = [];
             if (node.isExpanded) {
-                $http.get('api/gettree/' + node.id).then(function (response) {
+                $http.get('api/nodes/' + node.id + '/page/0').then(function (response) {
                     console.log(response.data);
                     node.nodes = response.data.result;
                     /*if (node.nodes.length === 0) {
@@ -116,7 +116,7 @@
 
         catalog.editNode = function (node) {
             catalog.isAdding = false;
-            $http.get('api/get/' + node.id).then(function (response) {
+            $http.get('api/node/' + node.id).then(function (response) {
                 node.fields = response.data.result.fields;
                 catalog.newNode = JSON.parse(JSON.stringify(node));
                 catalog.activeNode = node;
@@ -137,7 +137,7 @@
         };
 
         catalog.loadFindNodes = function () {
-            $http.get('api/find?q=' + catalog.findQuery + '&page=' + catalog.findPage).then(function (response) {
+            $http.get('api/node/find/page/' + catalog.findPage + '?query=' + catalog.findQuery).then(function (response) {
                 console.log(response.data);
                 if (response.data.result.length < 25) {
                     catalog.isFindEnd = true;
@@ -186,15 +186,18 @@
                 if (!confirm('Сохранить ' + catalog.newNode.name + '?')) return;
                 //console.log(catalog.newNode);
                 catalog.isFormShow = false;
-                $http.put('api/add', catalog.newNode).then(function (response) {
+                $http.put('api/node', catalog.newNode).then(function (response) {
                     //console.log(response.data.result);
                     var parent = catalog.getParent(catalog, catalog.newNode.parentId);
+                    parent.childrenCount++;
                     if (parent.isExpanded) {
                         parent.nodes.push(response.data.result);
+                        catalog.sortNodes(parent);
                     }
                     if (parent === catalog) {
                         catalog.addedNodes.push(response.data.result);
                     }
+
                     catalog.newNode = {};
                     var classList = document.getElementById('input-name-field').classList;
                     classList.remove('ng-dirty');
@@ -213,10 +216,10 @@
                         }
                     }
                     if (!founded) {
-                        $http.delete('api/removefield/' + fields[i].id);
+                        $http.delete('api/field/' + fields[i].id);
                     }
                 }
-                $http.put('api/update', catalog.newNode).then(function (response) {
+                $http.post('api/node/' + catalog.newNode.id, catalog.newNode).then(function (response) {
                     var node = response.data.result;
                     //console.log(node);
                     if (catalog.activeNode.parentId !== node.parentId) {
@@ -250,7 +253,7 @@
 
         catalog.removeNode = function (node) {
             if (!confirm('Удалить запись ' + node.name + '?')) return;
-            $http.delete('api/remove/' + node.id).then(function (response) {
+            $http.delete('api/node/' + node.id).then(function (response) {
                 if (response.data.result === true) {
                     var parent = catalog.getParent(catalog, node.parentId);
                     var index = parent.nodes.indexOf(node);

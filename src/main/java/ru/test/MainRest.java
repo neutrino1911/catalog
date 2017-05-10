@@ -23,53 +23,53 @@ public class MainRest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @GET @Path(value = "/get/{id : \\d+}")
-    public Response get(@PathParam("id") long id) {
-        if (id < 0) {
-            return getError(400);
-        }
-        Node node = catalogService.get(id);
-        if (node == null) {
-            return getError(404);
-        }
-        return getSuccess(node);
-    }
-
-    @GET @Path(value = "/gettree/{parentId : \\d+}")
-    public Response getTree(
+    @GET @Path(value = "/nodes/{parentId : \\d+}/page/{page : \\d+}")
+    public Response getNodes(
             @PathParam("parentId") long parentId,
-            @QueryParam("page") long page) {
+            @PathParam("page") long page) {
         if (parentId < 0 || page < 0) {
             return getError(400);
         }
-        List<Node> list = catalogService.getTree(parentId, page);
+        List<Node> list = catalogService.getNodes(parentId, page);
         if (list == null) {
             return getError(500);
         }
         return getSuccess(list);
     }
 
-    @GET @Path(value = "/find")
+    @GET @Path(value = "/node/find/page/{page : \\d+}")
     public Response find(
-            @QueryParam("q") String text,
-            @QueryParam("page") long page) {
+            @QueryParam("query") String text,
+            @PathParam("page") long page) {
         if (text.isEmpty() || page < 0) {
             return getError(400);
         }
-        List<Node> nodes = catalogService.find(text, page);
+        List<Node> nodes = catalogService.findNodes(text, page);
         if (nodes == null) {
             return getError(404);
         }
         return getSuccess(nodes);
     }
 
-    @PUT @Path(value = "/add")
+    @GET @Path(value = "/node/{id : \\d+}")
+    public Response getNode(@PathParam("id") long id) {
+        if (id < 0) {
+            return getError(400);
+        }
+        Node node = catalogService.getNode(id);
+        if (node == null) {
+            return getError(404);
+        }
+        return getSuccess(node);
+    }
+
+    @PUT @Path(value = "/node")
     @Consumes("application/json;charset=UTF-8")
-    public Response add(String body) {
+    public Response addNode(String body) {
         try {
             Node node = new ObjectMapper().readValue(body, Node.class);
             if (node.getParentId() < 0) return getError(400);
-            if (catalogService.add(node) != null) {
+            if (catalogService.addNode(node) != null) {
                 return getSuccess(node);
             } else {
                 return getError(500);
@@ -79,14 +79,14 @@ public class MainRest {
         }
     }
 
-    @PUT @Path(value = "/update")
+    @POST @Path(value = "/node/{id : \\d+}")
     @Consumes("application/json;charset=UTF-8")
-    public Response update(String body) {
+    public Response updateNode(@PathParam("id") long id, String body) {
         try {
             Node node = new ObjectMapper().readValue(body, Node.class);
             if (node.getId() < 1) return getError(400);
             if (node.getParentId() < 0) return getError(400);
-            if (catalogService.update(node) != null) {
+            if (catalogService.updateNode(node) != null) {
                 return getSuccess(node);
             } else {
                 return getError(500);
@@ -96,19 +96,19 @@ public class MainRest {
         }
     }
 
-    @DELETE @Path(value = "/remove/{id : \\d+}")
-    public Response removeItem(@PathParam("id") long id) {
+    @DELETE @Path(value = "/node/{id : \\d+}")
+    public Response removeNode(@PathParam("id") long id) {
         if (id < 0) {
             return getError(400);
         }
-        if (catalogService.remove(id)) {
+        if (catalogService.removeNode(id)) {
             return getSuccess(true);
         } else {
             return getError(404);
         }
     }
 
-    @DELETE @Path(value = "/removefield/{id : \\d+}")
+    @DELETE @Path(value = "/field/{id : \\d+}")
     public Response removeField(@PathParam("id") long id) {
         if (id < 0) {
             return getError(400);

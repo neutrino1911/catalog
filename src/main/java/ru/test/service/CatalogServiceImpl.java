@@ -17,7 +17,7 @@ public class CatalogServiceImpl implements CatalogService {
     private DataSource dataSource;
 
     @Override
-    public Node add(Node node) {
+    public Node addNode(Node node) {
         if (!checkNode(node)) return null;
         String AIQuery = "SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES" +
                 " WHERE TABLE_SCHEMA = 'catalog' AND TABLE_NAME = 'node'";
@@ -56,7 +56,7 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public List<Node> find(String text, long page) {
+    public List<Node> findNodes(String text, long page) {
         String findQuery = "SELECT `a`.`id`, `a`.`parent_id`, `a`.`name`, COUNT(`b`.`parent_id`) AS `children_count` " +
                 "FROM `node` `a` " +
                 "LEFT OUTER JOIN `node` `b` ON `a`.`id` = `b`.`parent_id` " +
@@ -83,7 +83,7 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public Node get(long nodeId) {
+    public Node getNode(long nodeId) {
         String nodeQuery = "SELECT `parent_id`, `name` FROM `node` WHERE `id` = ?";
         String fieldQuery = "SELECT `id`, `name`, `value` FROM `field` WHERE `node_id` = ?";
         Node node = new Node(nodeId);
@@ -115,7 +115,7 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public List<Node> getTree(long parentId, long page) {
+    public List<Node> getNodes(long parentId, long page) {
         String query;
         if (parentId == 0) {
             query = "SELECT `a`.`id`, `a`.`name`, COUNT(`b`.`parent_id`) AS `children_count` " +
@@ -130,12 +130,15 @@ public class CatalogServiceImpl implements CatalogService {
                     "WHERE `a`.`parent_id` = ? " +
                     "GROUP BY `a`.`id` ORDER BY `name` ASC LIMIT ?, 25";
         }
+        if (parentId > 0) {
+            query = query.replaceAll(" LIMIT \\?, 25", "");
+        }
         List<Node> list = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             if (parentId > 0) {
                 statement.setLong(1, parentId);
-                statement.setLong(2, page * 25);
+                //statement.setLong(2, page * 25);
             } else {
                 statement.setLong(1, page * 25);
             }
@@ -157,7 +160,7 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public boolean remove(long id) {
+    public boolean removeNode(long id) {
         String query;
         if (id == 0) {
             query = "DELETE FROM `node` WHERE `id` IS NULL";
@@ -174,7 +177,7 @@ public class CatalogServiceImpl implements CatalogService {
     }
 
     @Override
-    public Node update(Node node) {
+    public Node updateNode(Node node) {
         if (!checkNode(node)) return null;
         String nodeQuery = "UPDATE `node` SET `parent_id` = ?, `name` = ? WHERE `id` = ?";
         String fieldUpdateQuery = "UPDATE `field` SET `name` = ?, `value` = ? WHERE `id` = ?";

@@ -6,12 +6,12 @@ import java.util.List;
 
 public interface CatalogService {
 
-    Node add (Node node);
-    List<Node> find(String text, long page);
-    Node get(long id);
-    List<Node> getTree(long parentId, long page);
-    boolean remove(long id);
+    Node addNode(Node node);
+    List<Node> findNodes(String text, long page);
+    Node getNode(long id);
+    List<Node> getNodes(long parentId, long page);
+    boolean removeNode(long id);
     boolean removeField(long id);
-    Node update(Node node);
+    Node updateNode(Node node);
     void mock(long count);
 }
